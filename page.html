@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Cynic Mansion sandbox</title>
+        <meta charset='utf-8' />
+		<link rel="stylesheet" href="styles.css">
+	</head>
+	<body>
+		<canvas id='scr'>Upgrade browser to see canvas</canvas>
+		<canvas id='paint_bckgr'></canvas>
+		<canvas id='scr_2'></canvas>
+		<canvas id='paint'></canvas>
+		<div id="form_container">
+			<form id="gui_form">
+				<div class='pseudo_fieldset'>
+				<h1 class='pseudo_legend' id='header'>Cynic Mansion sandbox</h1>
+					<input type="button" class='overflowed_button' id="hide" value="Свернуть"></input>
+					<div id="container_hiding">
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Редактор персонажей</h1>
+							<input type="button" class='overflowed_button' id="add_npc" value="Добавить"></input>
+							<select class='select' id="npc_id">
+								<option>Персонаж...</option>
+							</select>
+							<input type="button" class='overflowed_button' id="del_npc" value="Удалить"></input>
+							<select class='select' id="skin_id">
+								<option>Скин...</option>
+							</select>
+							<div class='range_container'>
+								Жирность
+							</div>
+							<input type="range" class='range' id="fat" min="1" max="10" step="1" value="5">
+							<div class='range_container'>
+								Ум
+							</div>
+							<input type="range" class='range' id="mind" min="1" max="5" step="1" value="3">
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Поза</h1>
+							<div class='range_container'>
+								Направление
+							</div>
+							<input type="range" class='range' id="direction" min="1" max="2" step="1" value="1">
+							<div class='range_container'>
+								Глаза
+							</div>
+							<input type="range" class='range' id="eyes" min="1" max="5" step="1" value="1">
+							<div class='range_container'>
+								Рот
+							</div>
+							<input type="range" class='range' id="mouth" min="1" max="6" step="1" value="1">
+							<div class='range_container'>
+								Левая рука
+							</div>
+							<input type="range" class='range' id="lh" min="1" max="10" step="1" value="5">
+							<div class='range_container'>
+								Правая рука
+							</div>
+							<input type="range" class='range' id="rh" min="1" max="10" step="1" value="5">
+							<div class='range_container'>
+								Левая нога
+							</div>
+							<input type="range" class='range' id="ll" min="1" max="10" step="1" value="5">
+							<div class='range_container'>
+								Правая нога
+							</div>
+							<input type="range" class='range' id="rl" min="1" max="10" step="1" value="5">
+							<div class='range_container'>
+								Горизонтальное положение
+							</div>
+							<input type="range" class='range' id="x" min="0" max="100" step="1" value="50">
+							<div class='range_container'>
+								Вертикальное положение
+							</div>
+							<input type="range" class='range' id="y" min="0" max="100" step="1" value="50">
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Фон</h1>
+							<select class='select' id="back_change">
+								<option>Фон...</option>
+							</select>
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Модификация</h1>
+							<input type="button" class='overflowed_button' id="smooth" value="Включить сглаживание" title='Не работает для текста и карандаша!'></input>
+							<input type="button" class='overflowed_button' id="brush" value="Включить карандаш"></input>
+							<select id="brush_layer" style="width:100%;">
+								<option>Слой...</option>
+							</select>
+							<input type="button" class='overflowed_button' id="change_brush_color" value="Инвертировать цвет"></input>
+							<input type="button" class='overflowed_button' id="clear" value="Очистить"></input>
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Реплики</h1>
+							<input type="button" class='overflowed_button' id="add_rp" value="Добавить"></input>
+							<select id="rp_id" style="width:100%;">
+								<option>Реплика...</option>
+							</select>
+							<input type="text" class='text' id="rp_text" placeholder = "Текст реплики..."></input>
+							<input type="button" class='overflowed_button' id="del_rp" value="Удалить"></input>
+							<div class='range_container'>
+								Горизонтальное положение
+							</div>
+								<input type="range" class='range' min="0" max="100" step="1" value="50" id="rpx">
+							<div class='range_container'>
+								Вертикальное положение
+							</div>
+								<input type="range" class='range' min="0" max="100" step="1" value="50" id="rpy">
+							<input type="button" class='overflowed_button' id="change_rp_color" value="Инвертировать цвет"></input>
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Экспорт</h1>
+							<input type="button" class='overflowed_button' id="export_png" value="PNG"></input>
+						</div>
+						<div class='pseudo_fieldset'>
+							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Сборка комикса</h1>
+							<input type="button" class='overflowed_button' id="export_png" value="PNG"></input>
+							<input type="text" class='text' id="frames_number" placeholder = "Количество кадров..."></input>
+							<input type="button" class='overflowed_button' id="show_upload_btns" value="Показать кнопки"></input>
+							<div id='btns_placeholder'></div>
+							<input type="button" class='overflowed_button' id="export_comics" value="Выгрузить..."></input>
+						</div>
+					</div>
+			</form>
+		</div>
+		<script src="script.js"></script>
+		<script src="canvas2image/canvas2image.js"></script>
+	</body>
+</html>
