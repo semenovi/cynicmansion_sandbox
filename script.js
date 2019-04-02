@@ -1,71 +1,100 @@
-var canvas = document.getElementById("scr"),
-	paint = document.getElementById("paint"),
-	paint_bckgr = document.getElementById("paint_bckgr"),
-	canvas_front = document.getElementById("scr_2"),
-	hide_button = document.getElementById("hide"),
-	container_hiding = document.getElementById("container_hiding"),
-	gui_form = document.getElementById("gui_form"),
-	add_npc = document.getElementById("add_npc"),
-	del_npc = document.getElementById("del_npc"),
-	npc_id = document.getElementById("npc_id"),
-	back_change = document.getElementById("back_change"),
-	lh = document.getElementById("lh"),
-	rh = document.getElementById("rh"),
-	ll = document.getElementById("ll"),
-	rl = document.getElementById("rl"),
-	fat = document.getElementById("fat"),
-	mind = document.getElementById("mind"),
-	direction = document.getElementById("direction"),
-	eyes = document.getElementById("eyes"),
-	mouth = document.getElementById("mouth"),
-	smooth = document.getElementById("smooth"),
-	brush = document.getElementById("brush"),
-	brush_layer = document.getElementById("brush_layer"),
-	clear = document.getElementById("clear"),
-	add_rp = document.getElementById("add_rp"),
-	del_rp = document.getElementById("del_rp"),
-	rp_text = document.getElementById("rp_text"),
-	rp_id = document.getElementById("rp_id"),
-	frames_number = document.getElementById("frames_number"),
-	show_upload_btns = document.getElementById("show_upload_btns"),
-	export_comics = document.getElementById("export_comics"),
-	change_rp_color = document.getElementById("change_rp_color"),
-	change_brush_color = document.getElementById("change_brush_color"),
-	export_png = document.getElementById("export_png"),
-	btns_placeholder = document.getElementById("btns_placeholder"),
-	export_comics = document.getElementById("export_comics"),
-	header = document.getElementById("header"),
-	skin_id = document.getElementById("skin_id"),
-	hided = false,
-	btns_hided = true,
-	color = true,
-	brush_color = true,
-	last_btns_number = 0,
-	form_container = document.getElementById("form_container"),
-	x = document.getElementById("x"),
-	y = document.getElementById("y"),
-	rpx = document.getElementById("rpx"),
-	rpy = document.getElementById("rpy"),
-    ctx     = canvas.getContext('2d'),
-	pctx = paint.getContext('2d'),
-	ppaint_bckgr = paint_bckgr.getContext('2d'),
-	pcanvas_front = canvas_front.getContext('2d'),
-	bcgrnd = new Image(),
-	bcgrnd_front = new Image(),
-	sw = window.innerWidth,
-	sh = window.innerHeight,
-	number_of_npc = 0,
-	number_of_rp = 0,
-	rp_counter = 0,
-	id_counter = 0,
-	frame_counter = 0,
-	npcs = new Array(),
-	rps = new Array(),
-	smooth_enabled = false,
-	brush_layer_n = 1;
+// get the elements for the gui
 
-var i = 1;
-while(i < 3)
+// getting canvases
+var canvas				= document.getElementById("scr"),
+	paint				= document.getElementById("paint"),
+	paint_bckgr			= document.getElementById("paint_bckgr"),
+	canvas_front		= document.getElementById("scr_2");
+	
+// getting their context
+var ctx					= canvas.getContext('2d'),
+	pctx				= paint.getContext('2d'),
+	ppaint_bckgr		= paint_bckgr.getContext('2d'),
+	pcanvas_front		= canvas_front.getContext('2d');
+	
+// getting buttons, containers, text fields etc.
+var hide_button 		= document.getElementById("hide"),
+	
+	form_container 		= document.getElementById("form_container"),
+	container_hiding 	= document.getElementById("container_hiding"),
+	gui_form 			= document.getElementById("gui_form"),
+	
+	// npc editor
+	add_npc 			= document.getElementById("add_npc"),
+	npc_id 				= document.getElementById("npc_id"),
+	del_npc 			= document.getElementById("del_npc"),
+	skin_id 			= document.getElementById("skin_id"),
+	fat 				= document.getElementById("fat"),
+	mind 				= document.getElementById("mind"),
+	
+	// pose
+	direction 			= document.getElementById("direction"),
+	eyes 				= document.getElementById("eyes"),
+	mouth 				= document.getElementById("mouth"),
+	lh 					= document.getElementById("lh"),
+	rh 					= document.getElementById("rh"),
+	ll 					= document.getElementById("ll"),
+	rl 					= document.getElementById("rl"),
+	x 					= document.getElementById("x"),
+	y 					= document.getElementById("y"),
+	
+	// background
+	back_change 		= document.getElementById("back_change"),
+	
+	// additional instruments
+	smooth 				= document.getElementById("smooth"),
+	brush 				= document.getElementById("brush"),
+	brush_layer 		= document.getElementById("brush_layer"),
+	change_brush_color 	= document.getElementById("change_brush_color"),
+	clear 				= document.getElementById("clear"),
+	
+	// speech editor
+	add_rp 				= document.getElementById("add_rp"),
+	rp_id 				= document.getElementById("rp_id"),
+	rp_text 			= document.getElementById("rp_text"),
+	del_rp 				= document.getElementById("del_rp"),
+	rpx 				= document.getElementById("rpx"),
+	rpy 				= document.getElementById("rpy"),
+	change_rp_color 	= document.getElementById("change_rp_color"),
+	
+	// export one frame
+	export_png 			= document.getElementById("export_png"),
+	
+	// comics creator
+	frames_number 		= document.getElementById("frames_number"),
+	show_upload_btns 	= document.getElementById("show_upload_btns"),
+	// new buttons for uploading will be spawn here
+	btns_placeholder 	= document.getElementById("btns_placeholder"),
+	export_comics 		= document.getElementById("export_comics");
+	
+// global variables for control the gui
+var hided 				= false, // are gui hided?
+	btns_hided 			= true, // are buttons for upload hided?
+	color 				= true, // are black color using for current speech?
+	brush_color 		= true, // are black color using for painting on canvas?
+	last_btns_number 	= 0, // how much buutons for uploading was created last time?
+	bcgrnd 				= new Image(), // background image object
+	bcgrnd_front 		= new Image(), // upper picture of background image object
+	sw 					= window.innerWidth,
+	sh 					= window.innerHeight,
+	number_of_npc 		= 0, // number and counter have a differense: number can be decreased
+	number_of_rp 		= 0,
+	number_of_backs		= 2,
+	number_of_layers 	= 2,
+	rp_counter 			= 0,
+	id_counter 			= 0,
+	frame_counter 		= 0,
+	npcs 				= new Array(), // npcs that displayed on canvas
+	rps 				= new Array(), // speechs that displayed on canvas
+	smooth_enabled 		= false, // are smoothing enabled for canvases and export pictures?
+	brush_layer_n 		= 1, // which canvas intended for painting now?
+	scale 				= Math.min(sw / bcgrnd.width, sh / bcgrnd.height),
+	max_width_in_gui 	= form_container.getBoundingClientRect().width - 80 + 'px',
+	max_width_in_gui_min= 'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
+
+// background init
+var i = 0;
+while(i <= number_of_backs)
 {
 	var option = document.createElement("option");
 	option.text = i + '';
@@ -76,8 +105,9 @@ back_change.selectedIndex = 1;
 bcgrnd.src ='back_344/' +  back_change.value + '.png';
 bcgrnd_front.src ='back_344/' +  back_change.value + '_2.png';
 
-i = 1;
-while(i < 3)
+// painting layers init
+i = 0;
+while(i <= number_of_layers)
 {
 	var option = document.createElement("option");
 	option.text = i + '';
@@ -86,11 +116,6 @@ while(i < 3)
 }
 brush_layer.selectedIndex = 1;
 brush_layer_n = brush_layer.selectedIndex;
-
-scale = Math.min(sw / bcgrnd.width, sh / bcgrnd.height);
-
-max_width_in_gui = form_container.getBoundingClientRect().width - 80 + 'px';
-max_width_in_gui_min = 'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
 
 // NPC
 class npc
