@@ -88,12 +88,11 @@ var hided 				= false, // are gui hided?
 	rps 				= new Array(), // speechs that displayed on canvas
 	smooth_enabled 		= false, // are smoothing enabled for canvases and export pictures?
 	brush_layer_n 		= 1, // which canvas intended for painting now?
-	scale 				= Math.min(sw / bcgrnd.width, sh / bcgrnd.height),
 	max_width_in_gui 	= form_container.getBoundingClientRect().width - 80 + 'px',
 	max_width_in_gui_min= 'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
 
 // background init
-var i = 0;
+var i = 1;
 while(i <= number_of_backs)
 {
 	var option = document.createElement("option");
@@ -106,7 +105,7 @@ bcgrnd.src ='back_344/' +  back_change.value + '.png';
 bcgrnd_front.src ='back_344/' +  back_change.value + '_2.png';
 
 // painting layers init
-i = 0;
+i = 1;
 while(i <= number_of_layers)
 {
 	var option = document.createElement("option");
@@ -122,113 +121,75 @@ class npc
 {
 	constructor(id)
 	{
-		this.id = id;
-		this.body = new Image();
-		this.head = new Image();
-		this.eyes = new Image();
-		this.mouth = new Image();
-		this.lh = new Image();
-		this.rh = new Image();
-		this.ll = new Image();
-		this.rl = new Image();
-		this.body.src = 'body/body/5.png';
-		this.head.src = 'body/head/3.png';
-		this.eyes.src = 'body/eyes/1.png';
-		this.mouth.src = 'body/mouth/6.png';
-		this.lh.src = 'body/hands/l4.png';
-		this.rh.src = 'body/hands/r4.png';
-		this.ll.src = 'body/legs/l5.png';
-		this.rl.src = 'body/legs/r5.png';
+		this.id 		= id;
+		this.body 		= new Image();
+		this.head 		= new Image();
+		this.eyes 		= new Image();
+		this.mouth 		= new Image();
+		this.lh 		= new Image();
+		this.rh 		= new Image();
+		this.ll 		= new Image();
+		this.rl 		= new Image();
+		this.body.src 	= 'body/body/5.png';
+		this.head.src 	= 'body/head/3.png';
+		this.eyes.src 	= 'body/eyes/1.png';
+		this.mouth.src 	= 'body/mouth/6.png';
+		this.lh.src 	= 'body/hands/l4.png';
+		this.rh.src 	= 'body/hands/r4.png';
+		this.ll.src 	= 'body/legs/l5.png';
+		this.rl.src 	= 'body/legs/r5.png';
 		// "p" means "position" or "pose"
-		this.bp = 5;
-		this.hp = 3;
-		this.ep = 1;
-		this.mp = 6;
-		this.lhp = 4;
-		this.rhp = 4;
-		this.llp = 5;
-		this.rlp = 5;
-		this.x = 0;
-		this.y = 0;
-		this.direction = 1;
+		this.bp 		= 5;
+		this.hp 		= 3;
+		this.ep 		= 1;
+		this.mp 		= 6;
+		this.lhp 		= 4;
+		this.rhp 		= 4;
+		this.llp 		= 5;
+		this.rlp 		= 5;
+		this.x 			= 0;
+		this.y 			= 0;
+		this.direction 	= 1;
 	}
+	// init draw
 	draw(ctex)
 	{
 		var xx, yy;
 		xx = this.x;
 		yy = this.y;
-		this.ll.onload = function()
-		{
-			if(nlll)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nlll = false;
-			}
-		};
-		this.lll = nlll;
 		this.body.onload = function()
 		{
-			if(nbl)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nbl = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.bl = nbl;
 		this.head.onload = function()
 		{
-			if(nhl)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nhl = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.hl = nhl;
 		this.eyes.onload = function()
 		{
-			if(nel)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nel = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.el = nel;
 		this.mouth.onload = function()
 		{
-			if(nml)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nml = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.el = nml;
 		this.lh.onload = function()
 		{
-			if(nlhl)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nlhl = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.lhl = nlhl;
 		this.rh.onload = function()
 		{
-			if(nrhl)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nrhl = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.rhl = nrhl;
+		this.ll.onload = function()
+		{
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
+			
+		};
 		this.rl.onload = function()
 		{
-			if(nrll)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
-				nrll = false;
-			}
+			ctex.drawImage(this, xx, yy, this.width * scale, this.height * scale);
 		};
-		this.rll = nrll;
 	}
 	move(nx, ny)
 	{
@@ -240,36 +201,62 @@ class npc
 		this.direction = Number(pose);
 		if (this.direction == 1)
 		{
-			this.lh.src = 'body/hands/l' + this.lhp + '.png';
-			this.rh.src = 'body/hands/r' + this.rhp + '.png';
-			this.ll.src = 'body/legs/l' + this.llp + '.png';
-			this.rl.src = 'body/legs/r' + this.rlp + '.png';
-			this.body.src = 'body/body/' + this.bp + '.png';
-			this.head.src = 'body/head/' + this.hp + '.png';
-			this.eyes.src = 'body/eyes/' + this.ep + '.png';
-			this.mouth.src = 'body/mouth/' + this.mp + '.png';
+			this.lh.src 	= 'body/hands/l' + this.lhp + '.png';
+			this.rh.src 	= 'body/hands/r' + this.rhp + '.png';
+			this.ll.src 	= 'body/legs/l' + this.llp + '.png';
+			this.rl.src 	= 'body/legs/r' + this.rlp + '.png';
+			this.body.src 	= 'body/body/' + this.bp + '.png';
+			this.head.src 	= 'body/head/' + this.hp + '.png';
+			this.eyes.src 	= 'body/eyes/' + this.ep + '.png';
+			this.mouth.src 	= 'body/mouth/' + this.mp + '.png';
 		}
 		else if (this.direction == 2)
 		{
-			this.lh.src = 'body/hands_reversed/l' + this.lhp + '.png';
-			this.rh.src = 'body/hands_reversed/r' + this.rhp + '.png';
-			this.ll.src = 'body/legs_reversed/l' + this.llp + '.png';
-			this.rl.src = 'body/legs_reversed/r' + this.rlp + '.png';
-			this.body.src = 'body/body_reversed/' + this.bp + '.png';
-			this.head.src = 'body/head_reversed/' + this.hp + '.png';
-			this.eyes.src = 'body/eyes_reversed/' + this.ep + '.png';
-			this.mouth.src = 'body/mouth_reversed/' + this.mp + '.png';
+			this.lh.src 	= 'body/hands_reversed/l' + this.lhp + '.png';
+			this.rh.src 	= 'body/hands_reversed/r' + this.rhp + '.png';
+			this.ll.src 	= 'body/legs_reversed/l' + this.llp + '.png';
+			this.rl.src 	= 'body/legs_reversed/r' + this.rlp + '.png';
+			this.body.src 	= 'body/body_reversed/' + this.bp + '.png';
+			this.head.src 	= 'body/head_reversed/' + this.hp + '.png';
+			this.eyes.src 	= 'body/eyes_reversed/' + this.ep + '.png';
+			this.mouth.src 	= 'body/mouth_reversed/' + this.mp + '.png';
 		}
-		
-		this.direction = Number(pose);
-		this.change_lh(this.lhp);
-		this.change_rh(this.rhp);
-		this.change_ll(this.llp);
-		this.change_rl(this.rlp);
-		this.change_body(this.bp);
-		this.change_head(this.hp);
-		this.change_eyes(this.ep);
-		this.change_mouth(this.mp);
+	}
+	change_pose(tail, pose)
+	{
+		if (tail == "body")
+		{
+			bp = pose;
+		}
+		else if(tail == "head")
+		{
+			hp = pose;
+		}
+		else if(tail == "eyes")
+		{
+			ep = pose;
+		}
+		else if(tail == "mouth")
+		{
+			mp = pose;
+		}
+		else if(tail == "lh")
+		{
+			lhp = pose;
+		}
+		else if(tail == "rh")
+		{
+			rhp = pose;
+		}
+		else if(tail == "ll")
+		{
+			llp = pose;
+		}
+		else if(tail == "rl")
+		{
+			rlp = pose;
+		}
+		change_direction(this.direction);
 	}
 	redraw(ctex)
 	{
@@ -284,63 +271,75 @@ class npc
 	}
 }
 
-// GUI
+var scale 	= 0,
+	lx 		= 0, // |--
+	rx 		= 0, // --|
+	ty 		= 0, // ''|''
+	by 		= 0; // _|_
 
-var lx = (sw - bcgrnd.width * scale) / 2,
-	rx = lx + bcgrnd.width * scale,
-	ty = 0,
-	by = bcgrnd.height * scale;
-
-canvas.style.left = lx + 'px';
-canvas.width = rx - lx;
-canvas.height = by;
-
-paint.style.left = lx + 'px';
-paint.width = rx - lx;
-paint.height = by;
-
-paint_bckgr.style.left = lx + 'px';
-paint_bckgr.width = rx - lx;
-paint_bckgr.height = by;
-
-canvas_front.style.left = lx + 'px';
-canvas_front.width = rx - lx;
-canvas_front.height = by;
-
-if (smooth_enabled)
-{
-	ctx.imageSmoothingEnabled = true;
-	ctx.mozImageSmoothingEnabled = true;
-	ctx.msImageSmoothingEnabled = true;
-	ctx.webkitImageSmoothingEnabled = true;
-	pcanvas_front.imageSmoothingEnabled = true;
-	pcanvas_front.mozImageSmoothingEnabled = true;
-	pcanvas_front.msImageSmoothingEnabled = true;
-	pcanvas_front.webkitImageSmoothingEnabled = true;
-}
-else
-{
-	ctx.imageSmoothingEnabled = false;
-	ctx.mozImageSmoothingEnabled = false;
-	ctx.msImageSmoothingEnabled = false;
-	ctx.webkitImageSmoothingEnabled = false;
-	pcanvas_front.imageSmoothingEnabled = false;
-	pcanvas_front.mozImageSmoothingEnabled = false;
-	pcanvas_front.msImageSmoothingEnabled = false;
-	pcanvas_front.webkitImageSmoothingEnabled = false;
-}
-
+var flag_bck = true;
 function bck()
 {
+	if (flag_bck)
+	{
+		scale 	= Math.min(sw / bcgrnd.width, sh / bcgrnd.height),
+		lx 		= (sw - bcgrnd.width * scale) / 2,
+		rx 		= lx + bcgrnd.width * scale,
+		ty 		= 0,
+		by 		= bcgrnd.height * scale;
+		
+		// init a canvases size
+		canvas.style.left = lx + 'px';
+		canvas.width = rx - lx;
+		canvas.height = by;
+
+		paint.style.left = lx + 'px';
+		paint.width = rx - lx;
+		paint.height = by;
+
+		paint_bckgr.style.left = lx + 'px';
+		paint_bckgr.width = rx - lx;
+		paint_bckgr.height = by;
+
+		canvas_front.style.left = lx + 'px';
+		canvas_front.width = rx - lx;
+		canvas_front.height = by;
+
+		if (smooth_enabled)
+		{
+			ctx.imageSmoothingEnabled = true;
+			ctx.mozImageSmoothingEnabled = true;
+			ctx.msImageSmoothingEnabled = true;
+			ctx.webkitImageSmoothingEnabled = true;
+			pcanvas_front.imageSmoothingEnabled = true;
+			pcanvas_front.mozImageSmoothingEnabled = true;
+			pcanvas_front.msImageSmoothingEnabled = true;
+			pcanvas_front.webkitImageSmoothingEnabled = true;
+		}
+		else
+		{
+			ctx.imageSmoothingEnabled = false;
+			ctx.mozImageSmoothingEnabled = false;
+			ctx.msImageSmoothingEnabled = false;
+			ctx.webkitImageSmoothingEnabled = false;
+			pcanvas_front.imageSmoothingEnabled = false;
+			pcanvas_front.mozImageSmoothingEnabled = false;
+			pcanvas_front.msImageSmoothingEnabled = false;
+			pcanvas_front.webkitImageSmoothingEnabled = false;
+		}
+		
+		flag_bck = !flag_bck;
+	}
+	
+	// draw the background
 	ctx.drawImage(bcgrnd, 0, 0, canvas.width, canvas.height);
 }
 bcgrnd.onload = bck;
-
 function bck_front()
 {
 	pcanvas_front.drawImage(bcgrnd_front, 0, 0, canvas.width, canvas.height);
 }
-bcgrnd_front.onload = bck;
+bcgrnd_front.onload = bck_front;
 
 hide_button.addEventListener('click', function(event)
 {
@@ -364,6 +363,7 @@ hide_button.addEventListener('click', function(event)
 	}
 });
 
+// a "speech" class
 class rp
 {
 	constructor(text, x, y, color)
@@ -384,6 +384,7 @@ class rp
 	}
 }
 
+// calls every time when images on canvases should be reloaded
 function render()
 {
 	bck();
@@ -412,35 +413,25 @@ function render()
 	}
 }
 
-x.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].move((Number(x.value) * scale * 2.25 - 27 * scale), npcs[npc_id.selectedIndex - 1].y);
-		render();
-	}
-});
-
-y.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].move(npcs[npc_id.selectedIndex - 1].x, (Number(y.value) * scale * 1.26 - 22 * scale));
-		render();
-	}
-});
-
 add_npc.addEventListener('click', function(event)
 {
 	number_of_npc = number_of_npc + 1;
 	id_counter = id_counter + 1;
+	
+	// updating array of npc
 	var nnpc = new npc(id_counter);
 	npcs[number_of_npc - 1] = nnpc;
+	
+	// updating list of npc on a gui
 	var option = document.createElement("option");
 	option.text = '' + id_counter;
 	npc_id.add(option);
+	
+	// init new npc
 	npcs[number_of_npc - 1].move(90 * scale, 60 * scale);
 	npcs[number_of_npc - 1].draw(ctx);
+	
+	// updating all gui to the default values
 	npc_id.selectedIndex = npc_id.length - 1;
 	x.value = (npcs[npc_id.selectedIndex - 1].x + 27 * scale) / (scale * 2.25);
 	y.value = (npcs[npc_id.selectedIndex - 1].y + 22 * scale) / (scale * 1.26);
@@ -457,6 +448,7 @@ add_npc.addEventListener('click', function(event)
 
 npc_id.addEventListener('input', function(event)
 {
+	// this and every next time 
 	if(npc_id.selectedIndex > 0)
 	{
 		x.value = (npcs[npc_id.selectedIndex - 1].x + 27 * scale) / (scale * 2.25);
@@ -469,6 +461,24 @@ npc_id.addEventListener('input', function(event)
 		mind.value = npcs[npc_id.selectedIndex - 1].hp;
 		eyes.value = npcs[npc_id.selectedIndex - 1].ep;
 		mouth.value = npcs[npc_id.selectedIndex - 1].mp;
+	}
+});
+
+x.addEventListener('input', function(event)
+{
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].move((Number(x.value) * scale * 2.25 - 27 * scale), npcs[npc_id.selectedIndex - 1].y);
+		render();
+	}
+});
+
+y.addEventListener('input', function(event)
+{
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].move(npcs[npc_id.selectedIndex - 1].x, (Number(y.value) * scale * 1.26 - 22 * scale));
+		render();
 	}
 });
 
