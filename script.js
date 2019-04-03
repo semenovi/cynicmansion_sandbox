@@ -117,7 +117,7 @@ while(i <= number_of_layers)
 brush_layer.selectedIndex = 1;
 brush_layer_n = brush_layer.selectedIndex;
 
-// NPC
+// class for keep data about npc's on canvas
 class npc
 {
 	constructor(id)
@@ -127,10 +127,19 @@ class npc
 		this.head = new Image();
 		this.eyes = new Image();
 		this.mouth = new Image();
+		this.lh = new Image();
+		this.rh = new Image();
+		this.ll = new Image();
+		this.rl = new Image();
 		this.body.src = 'body/body/5.png';
 		this.head.src = 'body/head/3.png';
 		this.eyes.src = 'body/eyes/1.png';
 		this.mouth.src = 'body/mouth/6.png';
+		this.lh.src = 'body/hands/l4.png';
+		this.rh.src = 'body/hands/r4.png';
+		this.ll.src = 'body/legs/l5.png';
+		this.rl.src = 'body/legs/r5.png';
+		// "p" means "position" or "pose"
 		this.bp = 5;
 		this.hp = 3;
 		this.ep = 1;
@@ -139,39 +148,15 @@ class npc
 		this.rhp = 4;
 		this.llp = 5;
 		this.rlp = 5;
-		this.lh = new Image();
-		this.rh = new Image();
-		this.ll = new Image();
-		this.rl = new Image();
-		this.lh.src = 'body/hands/l4.png';
-		this.rh.src = 'body/hands/r4.png';
-		this.ll.src = 'body/legs/l5.png';
-		this.rl.src = 'body/legs/r5.png';
-		this.bl = true;
-		this.hl = true;
-		this.el = true;
-		this.ml = true;
-		this.lhl = true;
-		this.rhl = true;
-		this.lll = true;
-		this.rll = true;
 		this.x = 0;
 		this.y = 0;
 		this.direction = 1;
 	}
 	draw(ctex)
 	{
-		var xx, yy, nlhl, nrhl, nlll, nrll, nbl, nhl, nel, nml;
+		var xx, yy;
 		xx = this.x;
 		yy = this.y;
-		nlhl = this.lhl;
-		nrhl = this.rhl;
-		nlll = this.lll;
-		nrll = this.rll;
-		nbl = this.bl;
-		nhl = this.hl;
-		nel = this.el;
-		nml = this.ml;
 		this.ll.onload = function()
 		{
 			if(nlll)
