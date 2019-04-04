@@ -22,6 +22,7 @@
 							<select class='select' id="npc_id">
 								<option>Персонаж...</option>
 							</select>
+							<input type="button" class='overflowed_button' id="move_npc" value="Двигать"></input>
 							<input type="button" class='overflowed_button' id="del_npc" value="Удалить"></input>
 							<select class='select' id="skin_id">
 								<option>Скин...</option>
@@ -29,11 +30,11 @@
 							<div class='range_container'>
 								Жирность
 							</div>
-							<input type="range" class='range' id="fat" min="1" max="10" step="1" value="5">
+							<input type="range" class='range' id="body" min="1" max="10" step="1" value="5">
 							<div class='range_container'>
 								Ум
 							</div>
-							<input type="range" class='range' id="mind" min="1" max="5" step="1" value="3">
+							<input type="range" class='range' id="head" min="1" max="5" step="1" value="3">
 						</div>
 						<div class='pseudo_fieldset'>
 							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Поза</h1>
@@ -97,6 +98,7 @@
 								<option>Реплика...</option>
 							</select>
 							<input type="text" class='text' id="rp_text" placeholder = "Текст реплики..."></input>
+							<input type="button" class='overflowed_button' id="move_rp" value="Двигать"></input>
 							<input type="button" class='overflowed_button' id="del_rp" value="Удалить"></input>
 							<div class='range_container'>
 								Горизонтальное положение
@@ -114,10 +116,13 @@
 						</div>
 						<div class='pseudo_fieldset'>
 							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Сборка комикса</h1>
-							<input type="button" class='overflowed_button' id="export_png" value="PNG"></input>
 							<input type="text" class='text' id="frames_number" placeholder = "Количество кадров..."></input>
 							<input type="button" class='overflowed_button' id="show_upload_btns" value="Показать кнопки"></input>
 							<div id='btns_placeholder'></div>
+							<select id="comics_export_format" style="width:100%;">
+								<option>Экспорт в...</option>
+								<option>PNG</option>
+							</select>
 							<input type="button" class='overflowed_button' id="export_comics" value="Выгрузить..."></input>
 						</div>
 					</div>
