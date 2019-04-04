@@ -5,15 +5,16 @@ var canvas				= document.getElementById("scr"),
 	paint				= document.getElementById("paint"),
 	paint_bckgr			= document.getElementById("paint_bckgr"),
 	canvas_front		= document.getElementById("scr_2"),
+	splash_c 			= document.getElementById('splash'),
 	comics_canvas 		= document.createElement('canvas');
 		
-	
 // getting their context
 var ctx					= canvas.getContext('2d'),
 	pctx				= paint.getContext('2d'),
 	ppaint_bckgr		= paint_bckgr.getContext('2d'),
 	pcanvas_front		= canvas_front.getContext('2d'),
-	cc_ctx 				= comics_canvas.getContext('2d');
+	cc_ctx 				= comics_canvas.getContext('2d'),
+	splash_ctx 			= splash_c.getContext('2d');
 	
 // getting buttons, containers, text fields etc.
 var hide_button 		= document.getElementById("hide"),
@@ -102,9 +103,121 @@ form_container.getBoundingClientRect().width - 80 + 'px',
 	max_width_in_gui_min=
 'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
 
+// image arrays
+var splash 				= new Array(),
+	bcgrnd 				= new Array(),
+	bcgrnd_front 		= new Array(),
+	skin 				= new Array(),
+	body 				= new Array(),
+	head 				= new Array(),
+	eyes 				= new Array(),
+	mouth 				= new Array(),
+	lh 					= new Array(),
+	rh 					= new Array(),
+	ll 					= new Array(),
+	rl 					= new Array();
+
+// path masks for image files
+var splash_path 		= 'splash_screen/',
+	bcgrnd_path 		= 'back_344/',
+	bcgrnd_front_path 	= 'back_344/front',
+	skin_path 			= 'skins/',
+	body_path 			= 'body/body/',
+	body_path_r 		= 'body/body/reversed/',
+	head_path 			= 'body/head/',
+	head_path_r 		= 'body/head/reversed/',
+	eyes_path 			= 'body/eyes/',
+	eyes_path_r 		= 'body/eyes/reversed/',
+	mouth_path 			= 'body/mouth/',
+	mouth_path_r 		= 'body/mouth/reversed/',
+	lh_path 			= 'body/hands/l',
+	lh_path_r 			= 'body/hands/reversed/l',
+	rh_path 			= 'body/hands/r',
+	rh_path_r 			= 'body/hands/reversed/r',
+	ll_path 			= 'body/legs/l',
+	ll_path_r 			= 'body/legs/reversed/l',
+	rl_path 			= 'body/legs/r';
+	rl_path_r 			= 'body/legs/reversed/r';
+
+// image arrays size
+// multiplied by 2, because exists "left" version
+var splash_size 		= 8,
+	bcgrnd_size			= 2,
+	bcgrnd_front_size 	= 2,
+	skin_size 			= 0,
+	body_size 			= 10 * 2,
+	head_size 			= 10 * 2,
+	eyes_size 			= 5 * 2,
+	mouth_size 			= 6 * 2,
+	lh_size 			= 10 * 2,
+	rh_size 			= 10 * 2,
+	ll_size 			= 10 * 2,
+	rl_size 			= 10 * 2;
+
+// image counters
+var splash_loaded 		= 0,
+	bcgrnd_loaded 		= 0,
+	bcgrnd_front_loaded = 0,
+	skin_loaded 		= 0,
+	body_loaded 		= 0,
+	head_loaded 		= 0,
+	eyes_loaded 		= 0,
+	mouth_loaded 		= 0,
+	lh_loaded 			= 0,
+	rh_loaded 			= 0,
+	ll_loaded 			= 0,
+	rl_loaded 			= 0;
+
+
+// image loading
+var i = 1;
+while (i <= splash_size)
+{
+	splash[i - 1] = new Image();
+	splash[i - 1].src = splash_path + i + '.png';
+	splash[i - 1].onload = function()
+	{
+		splash_loaded  = splash_loaded + 1;
+		show_splash();
+	};
+	i = i + 1;
+}
+
+var splash_counter = 0;
+var timer_splah;
+function show_splash()
+{
+	if(splash_loaded == splash_size && splash_counter == 0)
+	{
+		var scale = Math.min(sw / 344, sh / 215);
+		splash_c.style.left = sw / 2.823529 + 'px';
+		splash_c.style.top = sh / 3.443298 + 'px';
+		splash_c.width = splash[0].width * 2.5;
+		splash_c.height = splash[0].height * 2.5;
+		splash_ctx.drawImage(splash[0], 0, 0);
+		timer_splah = setTimeout(show_splash,
+Math.floor(Math.random() * (3000 - 500 + 1)) + 500);
+		splash_counter = splash_counter + 1;
+	}
+	else if(splash_loaded==splash_size&&splash_counter>0&&splash_counter<7)
+	{
+		splash_ctx.drawImage(splash[splash_counter], 0, 0);
+		clearTimeout(timer_splah);
+		timer_splah = setTimeout(show_splash,
+Math.floor(Math.random() * (500 - 50 + 1)) + 50);
+		splash_counter = splash_counter + 1;
+	}
+	else if(splash_loaded == splash_size && splash_counter > 6)
+	{
+		splash_ctx.drawImage(splash[7], 0, 0);
+		clearTimeout(timer_splah);
+	}
+}
+
+/*
 // GUI init
 // background
-var i = 1;
+i = 1;
 while(i <= number_of_backs)
 {
 	var option = document.createElement("option");
@@ -159,7 +272,7 @@ function switch_rp_gui()
 }
 
 // export comics button disabling/enabling
-switch_comics_gui()
+function switch_comics_gui()
 {
 	export_comics.disabled = !export_comics.disabled;
 }
@@ -549,7 +662,9 @@ hide_button.addEventListener('click', function(event)
 	}
 });
 
+// ----------------------------------------------------------------------------
 // NPC EDITOR
+// ----------------------------------------------------------------------------
 
 add_npc.addEventListener('click', function(event)
 {
@@ -726,6 +841,7 @@ del_npc.addEventListener('click', function(event)
 	}
 });
 
+
 skin.addEventListener('click', function(event)
 {
 	if(npc_id.selectedIndex > 0)
@@ -733,6 +849,7 @@ skin.addEventListener('click', function(event)
 		
 	}
 });
+
 
 body.addEventListener('input', function(event)
 {
@@ -751,6 +868,10 @@ head.addEventListener('input', function(event)
 		render();
 	}
 });
+
+// ----------------------------------------------------------------------------
+// POSE EDITOR
+// ----------------------------------------------------------------------------
 
 x.addEventListener('input', function(event)
 {
@@ -1309,3 +1430,4 @@ smooth.addEventListener('click', function (e)
 	}
 	render();
 });
+*/
