@@ -103,88 +103,24 @@ form_container.getBoundingClientRect().width - 80 + 'px',
 	max_width_in_gui_min=
 'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
 
-// image arrays
-var splash 				= new Array(),
-	bcgrnd 				= new Array(),
-	bcgrnd_front 		= new Array(),
-	skin 				= new Array(),
-	body 				= new Array(),
-	head 				= new Array(),
-	eyes 				= new Array(),
-	mouth 				= new Array(),
-	lh 					= new Array(),
-	rh 					= new Array(),
-	ll 					= new Array(),
-	rl 					= new Array();
-
-// path masks for image files
-var splash_path 		= 'splash_screen/',
-	bcgrnd_path 		= 'back_344/',
-	bcgrnd_front_path 	= 'back_344/front',
-	skin_path 			= 'skins/',
-	body_path 			= 'body/body/',
-	body_path_r 		= 'body/body/reversed/',
-	head_path 			= 'body/head/',
-	head_path_r 		= 'body/head/reversed/',
-	eyes_path 			= 'body/eyes/',
-	eyes_path_r 		= 'body/eyes/reversed/',
-	mouth_path 			= 'body/mouth/',
-	mouth_path_r 		= 'body/mouth/reversed/',
-	lh_path 			= 'body/hands/l',
-	lh_path_r 			= 'body/hands/reversed/l',
-	rh_path 			= 'body/hands/r',
-	rh_path_r 			= 'body/hands/reversed/r',
-	ll_path 			= 'body/legs/l',
-	ll_path_r 			= 'body/legs/reversed/l',
-	rl_path 			= 'body/legs/r';
-	rl_path_r 			= 'body/legs/reversed/r';
-
-// image arrays size
-// multiplied by 2, because exists "left" version
-var splash_size 		= 8,
-	bcgrnd_size			= 2,
-	bcgrnd_front_size 	= 2,
-	skin_size 			= 0,
-	body_size 			= 10 * 2,
-	head_size 			= 10 * 2,
-	eyes_size 			= 5 * 2,
-	mouth_size 			= 6 * 2,
-	lh_size 			= 10 * 2,
-	rh_size 			= 10 * 2,
-	ll_size 			= 10 * 2,
-	rl_size 			= 10 * 2;
-
-// image counters
-var splash_loaded 		= 0,
-	bcgrnd_loaded 		= 0,
-	bcgrnd_front_loaded = 0,
-	skin_loaded 		= 0,
-	body_loaded 		= 0,
-	head_loaded 		= 0,
-	eyes_loaded 		= 0,
-	mouth_loaded 		= 0,
-	lh_loaded 			= 0,
-	rh_loaded 			= 0,
-	ll_loaded 			= 0,
-	rl_loaded 			= 0;
-
-
 class image_bank
 {
-	constructor(id, path, number, splash_link)
+	constructor(id, path, number, next_f, loading_updtr)
 	{
 		this.id = id;
 		this.path = path;
 		this.number = number;
 		this.counter = 0;
 		this.bank = new Array();
+		this.next_f = next_f;
+		this.loading_updtr = loading_updtr;
 	}
 	increase_counter()
 	{
 		this.counter = this.counter + 1;
-		if(this.counter == this.number)
+		if(this.counter == this.number && this.next_f != null)
 		{
-			splash_link();
+			this.loading_updtr(this.next_f);
 		}
 	}
 	start_loading()
@@ -194,16 +130,40 @@ class image_bank
 		{
 			this.bank[i - 1] = new Image();
 			this.bank[i - 1].src = this.path + i + '.png';
+			var this_link = this;
 			this.bank[i - 1].onload = function()
 			{
-				this.increase_counter();
+				this_link.increase_counter();
 			};
 			i = i + 1;
 		}
 	}
 }
 
-var splash= new image_bank('splash', 'splash_screen/', 8, show_splash);
+rl_r = new image_bank('rl_r', 'body/legs/reversed/r', 10, null, show_splash),
+bgrnd = new image_bank('bcgrnd', 'back_344/', 2, rl_r, show_splash),
+bgrnd_front =
+new image_bank('bcgrnd_front', 'back_344/front/', 2, bgrnd, show_splash),
+skin = new image_bank('skin', 'skins/', 0, bgrnd_front, show_splash),
+skin_r = new image_bank('skin_r', 'skins/reversed/', 0, skin, show_splash),
+body = new image_bank('body', 'body/body/', 10, skin_r, show_splash),
+body_r = new image_bank('body_r', 'body/body/reversed/', 10, body, show_splash),
+head = new image_bank('head', 'body/head/', 10, body_r, show_splash),
+head_r = new image_bank('head_r', 'body/head/reversed/', 10, head, show_splash),
+eyes = new image_bank('eyes', 'body/eyes/', 5, head_r, show_splash),
+eyes_r = new image_bank('eyes_r', 'body/eyes/reversed/', 5, eyes, show_splash),
+mouth = new image_bank('mouth', 'body/mouth/', 6, eyes_r, show_splash),
+mouth_r =
+new image_bank('mouth_r', 'body/mouth/reversed/', 6, mouth, show_splash),
+lh = new image_bank('lh', 'body/hands/l', 10, mouth_r, show_splash),
+lh_r = new image_bank('lh_r', 'body/hands/reversed/l', 10, lh, show_splash),
+rh = new image_bank('rh', 'body/hands/r', 10, lh_r, show_splash),
+rh_r = new image_bank('rh_r', 'body/hands/reversed/r', 10, rh, show_splash),
+ll = new image_bank('ll', 'body/legs/l', 10, rh_r, show_splash),
+ll_r = new image_bank('ll_r', 'body/legs/reversed/l', 10, ll, show_splash),
+rl = new image_bank('rl', 'body/legs/r', 10, ll_r, show_splash);
+splash = new image_bank('splash', 'splash_screen/', 8, rl, show_splash);
+
 var loading = 0;
 var timer_splash;
 form_container.style.visibility = 'hidden';
@@ -212,9 +172,9 @@ var end_of_animation = new Event('anim_end');
 window.addEventListener('anim_end', function (e) {
     console.log('printer state changed', e.detail);
 });
-*/
 window.dispatchEvent(evt);
-function show_splash()
+*/
+function show_splash(next_bank)
 {
 	if(loading == 0)
 	{
@@ -229,34 +189,33 @@ splash.bank[0], 0, 0, splash_c.width, splash_c.height);
 		
 		//timer_splash = setTimeout(show_splash,
 //Math.floor(Math.random() * (3000 - 500 + 1)) + 500);
+		
+		next_bank.start_loading();
 		loading = loading + 1;
 	}
-	else if(loading == 1)
+	else if(loading < 19)
 	{
-		loading = loading + 1;	
+		var splash_frame = Math.floor((loading / 20) * splash.number);
+		splash_ctx.drawImage(
+splash.bank[splash_frame], 0, 0, splash_c.width, splash_c.height);
+		
+		next_bank.start_loading();
+		loading = loading + 1;
 	}
-	else if(splash_loaded==splash_size&&splash_counter>0&&splash_counter<7)
+	else
 	{
 		splash_ctx.drawImage(
-splash[splash_counter], 0, 0, splash_c.width, splash_c.height);
-		clearTimeout(timer_splash);
-		timer_splash = setTimeout(show_splash,
-Math.floor(Math.random() * (1000 - 50 + 1)) + 50);
-		splash_counter = splash_counter + 1;
-	}
-	else if(splash_loaded == splash_size && splash_counter > 6)
-	{
-		window.dispatchEvent(end_of_animation);
-		splash_ctx.drawImage(
-splash[7], 0, 0, splash_c.width, splash_c.height);
-		clearTimeout(timer_splash);
+splash.bank[7], 0, 0, splash_c.width, splash_c.height);
+		show_gui();
 	}
 }
 
 function show_gui()
 {
-	
+	form_container.style.visibility = 'visible';
 }
+
+splash.start_loading();
 
 /*
 // GUI init
