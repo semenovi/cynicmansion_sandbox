@@ -169,69 +169,71 @@ var splash_loaded 		= 0,
 	rl_loaded 			= 0;
 
 
-// image loading
-// splash
-var i = 1;
-while (i <= splash_size)
+class image_bank
 {
-	splash[i - 1] = new Image();
-	splash[i - 1].src = splash_path + i + '.png';
-	splash[i - 1].onload = function()
+	constructor(id, path, number, splash_link)
 	{
-		splash_loaded  = splash_loaded + 1;
-		show_splash();
-	};
-	i = i + 1;
-}
-// bcgrnd
-i = 1;
-while (i <= bcgrnd_size)
-{
-	bcgrnd[i - 1] = new Image();
-	bcgrnd[i - 1].src = bcgrnd_path + i + '.png';
-	bcgrnd[i - 1].onload = function()
+		this.id = id;
+		this.path = path;
+		this.number = number;
+		this.counter = 0;
+		this.bank = new Array();
+	}
+	increase_counter()
 	{
-		bcgrnd_loaded  = bcgrnd_loaded + 1;
-		finish_loading();
-	};
-	i = i + 1;
-}
-
-function finish_loading()
-{
-	var fnshd = (splash_loaded == splash_size) &&
-				(splash_loaded == bcgrnd_size) &&
-				(splash_loaded == bcgrnd_front_size) &&
-				(splash_loaded == skin_size) &&
-				(splash_loaded == body_size) &&
-				(splash_loaded == head_size) &&
-				(splash_loaded == eyes_size) &&
-				(splash_loaded == mouth_size) &&
-				(splash_loaded == lh_size) &&
-				(splash_loaded == rh_size) &&
-				(splash_loaded == ll_size) &&
-				(splash_loaded == rl_size);
-	if (fnshd)
+		this.counter = this.counter + 1;
+		if(this.counter == this.number)
+		{
+			splash_link();
+		}
+	}
+	start_loading()
 	{
-		show_gui();
+		var i = 1;
+		while (i <= this.number)
+		{
+			this.bank[i - 1] = new Image();
+			this.bank[i - 1].src = this.path + i + '.png';
+			this.bank[i - 1].onload = function()
+			{
+				this.increase_counter();
+			};
+			i = i + 1;
+		}
 	}
 }
 
-var splash_counter = 0;
+var splash= new image_bank('splash', 'splash_screen/', 8, show_splash);
+var loading = 0;
 var timer_splash;
 form_container.style.visibility = 'hidden';
+/*
+var end_of_animation = new Event('anim_end');
+window.addEventListener('anim_end', function (e) {
+    console.log('printer state changed', e.detail);
+});
+*/
+window.dispatchEvent(evt);
 function show_splash()
 {
-	if(splash_loaded == splash_size && splash_counter == 0)
+	if(loading == 0)
 	{
+		// canvas moving
 		splash_c.style.left = '20%';
 		splash_c.width = sw * 0.6 - 10;
 		splash_c.height = (sw * 0.6 - 10) / 2;
 		splash_c.style.top = (sh - splash_c.height) / 2 + 'px';
-		splash_ctx.drawImage(splash[0], 0, 0, splash_c.width, splash_c.height);
-		timer_splash = setTimeout(show_splash,
-Math.floor(Math.random() * (3000 - 500 + 1)) + 500);
-		splash_counter = splash_counter + 1;
+		
+		splash_ctx.drawImage(
+splash.bank[0], 0, 0, splash_c.width, splash_c.height);
+		
+		//timer_splash = setTimeout(show_splash,
+//Math.floor(Math.random() * (3000 - 500 + 1)) + 500);
+		loading = loading + 1;
+	}
+	else if(loading == 1)
+	{
+		loading = loading + 1;	
 	}
 	else if(splash_loaded==splash_size&&splash_counter>0&&splash_counter<7)
 	{
@@ -244,6 +246,7 @@ Math.floor(Math.random() * (1000 - 50 + 1)) + 50);
 	}
 	else if(splash_loaded == splash_size && splash_counter > 6)
 	{
+		window.dispatchEvent(end_of_animation);
 		splash_ctx.drawImage(
 splash[7], 0, 0, splash_c.width, splash_c.height);
 		clearTimeout(timer_splash);
