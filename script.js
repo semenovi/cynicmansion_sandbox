@@ -101,30 +101,48 @@ var hided 				= false, // are gui hided?
 	max_width_in_gui 	=
 form_container.getBoundingClientRect().width - 80 + 'px',
 	max_width_in_gui_min=
-'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)';
+'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)',
+	timer_splash;
 
 class image_bank
 {
-	constructor(id, path, number, next_f, loading_updtr)
+	constructor(id, path, number, next_bank)
 	{
 		this.id = id;
 		this.path = path;
 		this.number = number;
 		this.counter = 0;
 		this.bank = new Array();
-		this.next_f = next_f;
-		this.loading_updtr = loading_updtr;
+		this.next_bank = next_bank;
+		this.loading_status = 0;
 	}
-	increase_counter()
+	exit_if_all_loaded()
 	{
 		this.counter = this.counter + 1;
-		if(this.counter == this.number && this.next_f != null)
+		if(this.counter == this.number && this.next_bank != null)
 		{
-			this.loading_updtr(this.next_f);
+			var bank_loaded = new CustomEvent("bank_loaded",
+			{
+				detail:
+				{
+					loading_status: this.loading_status,
+					next_bank: this.next_bank
+				}
+			});
+			window.dispatchEvent(bank_loaded);
+			console.log(this.id + " bank loaded");
+		}
+		else if(this.counter == this.number && this.next_bank == null)
+		{
+			console.log(this.id + " bank loaded");
+			console.log("loading complete");
+			timer_splash = setTimeout(
+finish_loading, Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000);
 		}
 	}
-	start_loading()
+	start_loading(loading_status_before)
 	{
+		this.loading_status = loading_status_before + 1;
 		var i = 1;
 		while (i <= this.number)
 		{
@@ -133,40 +151,79 @@ class image_bank
 			var this_link = this;
 			this.bank[i - 1].onload = function()
 			{
-				this_link.increase_counter();
+				this_link.exit_if_all_loaded();
 			};
 			i = i + 1;
 		}
 	}
 }
 
-rl_r = new image_bank('rl_r', 'body/legs/reversed/r', 10, null, show_splash),
-bgrnd = new image_bank('bcgrnd', 'back_344/', 2, rl_r, show_splash),
-bgrnd_front =
-new image_bank('bcgrnd_front', 'back_344/front/', 2, bgrnd, show_splash),
-skin = new image_bank('skin', 'skins/', 0, bgrnd_front, show_splash),
-skin_r = new image_bank('skin_r', 'skins/reversed/', 0, skin, show_splash),
-body = new image_bank('body', 'body/body/', 10, skin_r, show_splash),
-body_r = new image_bank('body_r', 'body/body/reversed/', 10, body, show_splash),
-head = new image_bank('head', 'body/head/', 10, body_r, show_splash),
-head_r = new image_bank('head_r', 'body/head/reversed/', 10, head, show_splash),
-eyes = new image_bank('eyes', 'body/eyes/', 5, head_r, show_splash),
-eyes_r = new image_bank('eyes_r', 'body/eyes/reversed/', 5, eyes, show_splash),
-mouth = new image_bank('mouth', 'body/mouth/', 6, eyes_r, show_splash),
-mouth_r =
-new image_bank('mouth_r', 'body/mouth/reversed/', 6, mouth, show_splash),
-lh = new image_bank('lh', 'body/hands/l', 10, mouth_r, show_splash),
-lh_r = new image_bank('lh_r', 'body/hands/reversed/l', 10, lh, show_splash),
-rh = new image_bank('rh', 'body/hands/r', 10, lh_r, show_splash),
-rh_r = new image_bank('rh_r', 'body/hands/reversed/r', 10, rh, show_splash),
-ll = new image_bank('ll', 'body/legs/l', 10, rh_r, show_splash),
-ll_r = new image_bank('ll_r', 'body/legs/reversed/l', 10, ll, show_splash),
-rl = new image_bank('rl', 'body/legs/r', 10, ll_r, show_splash);
-splash = new image_bank('splash', 'splash_screen/', 8, rl, show_splash);
+var rl_r 		= new image_bank(20, 'body/legs/reversed/r/', 10, null),
+	bgrnd 		= new image_bank(19, 'back_344/', 2, rl_r),
+	bgrnd_front = new image_bank(18, 'back_344/front/', 2, bgrnd),
+	skin 		= new image_bank(17, 'skins/', 12, bgrnd_front),
+	skin_r 		= new image_bank(16, 'skins/reversed/', 12, skin),
+	body 		= new image_bank(15, 'body/body/', 10, skin_r),
+	body_r 		= new image_bank(14, 'body/body/reversed/', 10, body),
+	head 		= new image_bank(13, 'body/head/', 5, body_r),
+	head_r 		= new image_bank(12, 'body/head/reversed/', 5, head),
+	eyes 		= new image_bank(11, 'body/eyes/', 5, head_r),
+	eyes_r 		= new image_bank(10, 'body/eyes/reversed/', 5, eyes),
+	mouth 		= new image_bank(9, 'body/mouth/', 6, eyes_r),
+	mouth_r 	= new image_bank(8, 'body/mouth/reversed/', 6, mouth),
+	lh 			= new image_bank(7, 'body/hands/l/', 10, mouth_r),
+	lh_r 		= new image_bank(6, 'body/hands/reversed/l/', 10, lh),
+	rh 			= new image_bank(5, 'body/hands/r/', 10, lh_r),
+	rh_r 		= new image_bank(4, 'body/hands/reversed/r/', 10, rh),
+	ll 			= new image_bank(3, 'body/legs/l/', 10, rh_r),
+	ll_r 		= new image_bank(2, 'body/legs/reversed/l/', 10, ll),
+	rl 			= new image_bank(1, 'body/legs/r/', 10, ll_r),
+	splash 		= new image_bank(0, 'splash_screen/', 8, rl);
 
-var loading = 0;
-var timer_splash;
 form_container.style.visibility = 'hidden';
+
+
+function start_loading(e) {
+    move_splash_canvas();
+	continue_loading(0, e.detail.next_bank);
+	window.removeEventListener('bank_loaded', start_loading);
+}
+window.addEventListener('bank_loaded', start_loading);
+splash.start_loading(0);
+
+function move_splash_canvas()
+{
+	splash_c.style.left = '20%';
+	splash_c.width = sw * 0.6 - 10;
+	splash_c.height = (sw * 0.6 - 10) / 2;
+	splash_c.style.top = (sh - splash_c.height) / 2 + 'px';
+}
+
+function continue_loading(loading_status, next_bank)
+{
+	var frame = Math.floor(loading_status * (splash.number / 20));
+	splash_ctx.drawImage(
+splash.bank[frame], 0, 0, splash_c.width, splash_c.height);
+	console.log(frame + " frame showed");
+	console.log(next_bank.id);
+	console.log(loading_status);
+	console.log("----");
+	window.addEventListener('bank_loaded', function (e)
+	{
+		continue_loading(e.detail.loading_status, e.detail.next_bank);
+		window.removeEventListener('bank_loaded', arguments.callee, false);
+	});
+	next_bank.start_loading(loading_status);
+}
+
+function finish_loading()
+{
+	splash_ctx.drawImage(
+splash.bank[splash.number - 1], 0, 0, splash_c.width, splash_c.height);
+	clearTimeout(timer_splash);
+	splash_c.style.visibility = 'hidden';
+	form_container.style.visibility = 'visible';
+}
 /*
 var end_of_animation = new Event('anim_end');
 window.addEventListener('anim_end', function (e) {
@@ -174,48 +231,7 @@ window.addEventListener('anim_end', function (e) {
 });
 window.dispatchEvent(evt);
 */
-function show_splash(next_bank)
-{
-	if(loading == 0)
-	{
-		// canvas moving
-		splash_c.style.left = '20%';
-		splash_c.width = sw * 0.6 - 10;
-		splash_c.height = (sw * 0.6 - 10) / 2;
-		splash_c.style.top = (sh - splash_c.height) / 2 + 'px';
-		
-		splash_ctx.drawImage(
-splash.bank[0], 0, 0, splash_c.width, splash_c.height);
-		
-		//timer_splash = setTimeout(show_splash,
-//Math.floor(Math.random() * (3000 - 500 + 1)) + 500);
-		
-		next_bank.start_loading();
-		loading = loading + 1;
-	}
-	else if(loading < 19)
-	{
-		var splash_frame = Math.floor((loading / 20) * splash.number);
-		splash_ctx.drawImage(
-splash.bank[splash_frame], 0, 0, splash_c.width, splash_c.height);
-		
-		next_bank.start_loading();
-		loading = loading + 1;
-	}
-	else
-	{
-		splash_ctx.drawImage(
-splash.bank[7], 0, 0, splash_c.width, splash_c.height);
-		show_gui();
-	}
-}
 
-function show_gui()
-{
-	form_container.style.visibility = 'visible';
-}
-
-splash.start_loading();
 
 /*
 // GUI init
