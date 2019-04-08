@@ -10,8 +10,8 @@
 		<canvas id='paint_bckgr'></canvas>
 		<canvas id='scr_2'></canvas>
 		<canvas id='paint'></canvas>
-		<canvas id='splash'></canvas>
-		<div id="form_container">
+		<canvas id='splash' style="visibility:visible;"></canvas>
+		<div id="form_container" style="visibility:hidden;">
 			<form id="gui_form">
 				<div class='pseudo_fieldset'>
 				<h1 class='pseudo_legend' id='header'>Cynic Mansion sandbox</h1>
@@ -40,13 +40,21 @@
 						<div class='pseudo_fieldset'>
 							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Поза</h1>
 							<div class='range_container'>
+								Горизонтальное положение
+							</div>
+							<input type="range" class='range' id="x" min="0" max="100" step="1" value="50">
+							<div class='range_container'>
+								Вертикальное положение
+							</div>
+							<input type="range" class='range' id="y" min="0" max="100" step="1" value="50">
+							<div class='range_container'>
 								Направление
 							</div>
-							<input type="range" class='range' id="direction" min="1" max="2" step="1" value="1">
+							<input type="range" class='range' id="direction" min="1" max="4" step="1" value="1">
 							<div class='range_container'>
 								Глаза
 							</div>
-							<input type="range" class='range' id="eyes" min="1" max="5" step="1" value="1">
+							<input type="range" class='range' id="eyes" min="1" max="6" step="1" value="1">
 							<div class='range_container'>
 								Рот
 							</div>
@@ -67,14 +75,6 @@
 								Правая нога
 							</div>
 							<input type="range" class='range' id="rl" min="1" max="10" step="1" value="5">
-							<div class='range_container'>
-								Горизонтальное положение
-							</div>
-							<input type="range" class='range' id="x" min="0" max="100" step="1" value="50">
-							<div class='range_container'>
-								Вертикальное положение
-							</div>
-							<input type="range" class='range' id="y" min="0" max="100" step="1" value="50">
 						</div>
 						<div class='pseudo_fieldset'>
 							<h1 class='pseudo_legend' id='header' style='font-size:0.9em;'>Фон</h1>

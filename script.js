@@ -1,10 +1,9 @@
 // get the elements for the gui
-
 // getting canvases
 var canvas				= document.getElementById("scr"),
-	paint				= document.getElementById("paint"),
 	paint_bckgr			= document.getElementById("paint_bckgr"),
 	canvas_front		= document.getElementById("scr_2"),
+	paint				= document.getElementById("paint"),
 	splash_c 			= document.getElementById('splash'),
 	comics_canvas 		= document.createElement('canvas');
 		
@@ -69,6 +68,7 @@ var hide_button 		= document.getElementById("hide"),
 	// comics creator
 	frames_number 		= document.getElementById("frames_number"),
 	show_upload_btns 	= document.getElementById("show_upload_btns"),
+	comics_export_format= document.getElementById("comics_export_format"),
 	// new buttons for uploading will be spawn here
 	btns_placeholder 	= document.getElementById("btns_placeholder"),
 	export_comics 		= document.getElementById("export_comics");
@@ -78,16 +78,12 @@ var hided 				= false, // are gui hided?
 	btns_hided 			= true, // are buttons for upload hided?
 	color 				= true, // are black color using for current speech?
 	brush_color 		= true, // are black color using for painting on canvas?
-	bcgrnd 				= new Image(), // background image object
-	bcgrnd_front 		= new Image(),	// upper picture of background image
-										// object
 	sw 					= window.innerWidth,
 	sh 					= window.innerHeight,
 	number_of_npc 		= 0,	// number and counter have a differense:
 								// number can be decreased
 	number_of_rp 		= 0,
-	number_of_backs		= 2,
-	number_of_layers 	= 2,
+	number_of_layers 	= 2, // layers where does the brush work
 	rp_counter 			= 0,
 	id_counter 			= 0,
 	frame_counter 		= 0,
@@ -95,15 +91,16 @@ var hided 				= false, // are gui hided?
 	npcs 				= new Array(), // npcs that displayed on canvas
 	rps 				= new Array(), // speechs that displayed on canvas
 	comics_images 		= new Array(), // speechs that displayed on canvas
-	smooth_enabled 		= false,	// are smoothing enabled for canvases and
-									// export pictures?
 	brush_layer_n 		= 1, // which canvas intended for painting now?
-	max_width_in_gui 	=
-form_container.getBoundingClientRect().width - 80 + 'px',
-	max_width_in_gui_min=
-'calc(' + (form_container.getBoundingClientRect().width - 80) + 'px - 6px)',
-	timer_splash;
+	timer_splash,
+	scale 				= Math.min(sw / 344, sh / 215),
+	lx 					= (sw - 344 * scale) / 2,
+	rx 					= lx + 344 * scale,
+	ty 					= 0,
+	by 					= 215 * scale;
 
+// classes definition
+// a class that contains an array of Images and loads them
 class image_bank
 {
 	constructor(id, path, number, next_bank)
@@ -130,12 +127,9 @@ class image_bank
 				}
 			});
 			window.dispatchEvent(bank_loaded);
-			console.log(this.id + " bank loaded");
 		}
 		else if(this.counter == this.number && this.next_bank == null)
 		{
-			console.log(this.id + " bank loaded");
-			console.log("loading complete");
 			timer_splash = setTimeout(
 finish_loading, Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000);
 		}
@@ -157,446 +151,135 @@ finish_loading, Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000);
 		}
 	}
 }
-
-var rl_r 		= new image_bank(20, 'body/legs/reversed/r/', 10, null),
-	bgrnd 		= new image_bank(19, 'back_344/', 2, rl_r),
-	bgrnd_front = new image_bank(18, 'back_344/front/', 2, bgrnd),
-	skin 		= new image_bank(17, 'skins/', 12, bgrnd_front),
-	skin_r 		= new image_bank(16, 'skins/reversed/', 12, skin),
-	body 		= new image_bank(15, 'body/body/', 10, skin_r),
-	body_r 		= new image_bank(14, 'body/body/reversed/', 10, body),
-	head 		= new image_bank(13, 'body/head/', 5, body_r),
-	head_r 		= new image_bank(12, 'body/head/reversed/', 5, head),
-	eyes 		= new image_bank(11, 'body/eyes/', 5, head_r),
-	eyes_r 		= new image_bank(10, 'body/eyes/reversed/', 5, eyes),
-	mouth 		= new image_bank(9, 'body/mouth/', 6, eyes_r),
-	mouth_r 	= new image_bank(8, 'body/mouth/reversed/', 6, mouth),
-	lh 			= new image_bank(7, 'body/hands/l/', 10, mouth_r),
-	lh_r 		= new image_bank(6, 'body/hands/reversed/l/', 10, lh),
-	rh 			= new image_bank(5, 'body/hands/r/', 10, lh_r),
-	rh_r 		= new image_bank(4, 'body/hands/reversed/r/', 10, rh),
-	ll 			= new image_bank(3, 'body/legs/l/', 10, rh_r),
-	ll_r 		= new image_bank(2, 'body/legs/reversed/l/', 10, ll),
-	rl 			= new image_bank(1, 'body/legs/r/', 10, ll_r),
-	splash 		= new image_bank(0, 'splash_screen/', 8, rl);
-
-form_container.style.visibility = 'hidden';
-
-
-function start_loading(e) {
-    move_splash_canvas();
-	continue_loading(0, e.detail.next_bank);
-	window.removeEventListener('bank_loaded', start_loading);
-}
-window.addEventListener('bank_loaded', start_loading);
-splash.start_loading(0);
-
-function move_splash_canvas()
-{
-	splash_c.style.left = '20%';
-	splash_c.width = sw * 0.6 - 10;
-	splash_c.height = (sw * 0.6 - 10) / 2;
-	splash_c.style.top = (sh - splash_c.height) / 2 + 'px';
-}
-
-function continue_loading(loading_status, next_bank)
-{
-	var frame = Math.floor(loading_status * (splash.number / 20));
-	splash_ctx.drawImage(
-splash.bank[frame], 0, 0, splash_c.width, splash_c.height);
-	console.log(frame + " frame showed");
-	console.log(next_bank.id);
-	console.log(loading_status);
-	console.log("----");
-	window.addEventListener('bank_loaded', function (e)
-	{
-		continue_loading(e.detail.loading_status, e.detail.next_bank);
-		window.removeEventListener('bank_loaded', arguments.callee, false);
-	});
-	next_bank.start_loading(loading_status);
-}
-
-function finish_loading()
-{
-	splash_ctx.drawImage(
-splash.bank[splash.number - 1], 0, 0, splash_c.width, splash_c.height);
-	clearTimeout(timer_splash);
-	splash_c.style.visibility = 'hidden';
-	form_container.style.visibility = 'visible';
-}
-/*
-var end_of_animation = new Event('anim_end');
-window.addEventListener('anim_end', function (e) {
-    console.log('printer state changed', e.detail);
-});
-window.dispatchEvent(evt);
-*/
-
-
-/*
-// GUI init
-// background
-i = 1;
-while(i <= number_of_backs)
-{
-	var option = document.createElement("option");
-	option.text = i + '';
-	back_change.add(option);
-	i = i + 1;
-}
-back_change.selectedIndex = 1;
-bcgrnd.src ='back_344/' +  back_change.value + '.png';
-bcgrnd_front.src ='back_344/' +  back_change.value + '_2.png';
-
-// painting layers
-i = 1;
-while(i <= number_of_layers)
-{
-	var option = document.createElement("option");
-	option.text = i + '';
-	brush_layer.add(option);
-	i = i + 1;
-}
-brush_layer.selectedIndex = 1;
-brush_layer_n = brush_layer.selectedIndex;
-
-// buttons disabling/enabling
-function switch_npc_gui()
-{
-	move_npc.disabled = !move_npc.disabled;
-	del_npc.disabled = !del_npc.disabled;
-	skin_id.disabled = !skin_id.disabled;
-	body.disabled = !body.disabled;
-	head.disabled = !head.disabled;
-
-	direction.disabled = !direction.disabled;
-	eyes.disabled = !eyes.disabled;
-	mouth.disabled = !mouth.disabled;
-	lh.disabled = !lh.disabled;
-	rh.disabled = !rh.disabled;
-	ll.disabled = !ll.disabled;
-	rl.disabled = !rl.disabled;
-	x.disabled = !x.disabled;
-	y.disabled = !y.disabled;
-}
-
-// speech disabling/enabling
-function switch_rp_gui()
-{
-	move_rp.disabled = !move_rp.disabled;
-	del_rp.disabled = !del_rp.disabled;
-	rpx.disabled = !rpx.disabled;
-	rpy.disabled = !rpy.disabled;
-	change_rp_color.disabled = !change_rp_color.disabled;
-}
-
-// export comics button disabling/enabling
-function switch_comics_gui()
-{
-	export_comics.disabled = !export_comics.disabled;
-}
-
-// disabling
-switch_npc_gui();
-switch_rp_gui();
-switch_comics_gui();
-
-// scale is calculated automatically, don't try change it here
-var scale 	= 0,
-	lx 		= 0, // |--
-	rx 		= 0, // --|
-	ty 		= 0, // ''|''
-	by 		= 0; // _|_
-
-// if flag is true, scale variables are initialized
-// bck means background, but when you use this function for the first time,
-// the user interface is configured.
-var flag_bck = true;
-function bck()
-{
-	if (flag_bck)
-	{
-		scale 	= Math.min(sw / bcgrnd.width, sh / bcgrnd.height),
-		lx 		= (sw - bcgrnd.width * scale) / 2,
-		rx 		= lx + bcgrnd.width * scale,
-		ty 		= 0,
-		by 		= bcgrnd.height * scale;
-		
-		// init a canvases size and position
-		canvas.style.left = lx + 'px';
-		canvas.width = rx - lx;
-		canvas.height = by;
-
-		paint.style.left = lx + 'px';
-		paint.width = rx - lx;
-		paint.height = by;
-
-		paint_bckgr.style.left = lx + 'px';
-		paint_bckgr.width = rx - lx;
-		paint_bckgr.height = by;
-
-		canvas_front.style.left = lx + 'px';
-		canvas_front.width = rx - lx;
-		canvas_front.height = by;
-
-		if (smooth_enabled)
-		{
-			ctx.imageSmoothingEnabled = true;
-			ctx.mozImageSmoothingEnabled = true;
-			ctx.msImageSmoothingEnabled = true;
-			ctx.webkitImageSmoothingEnabled = true;
-			pcanvas_front.imageSmoothingEnabled = true;
-			pcanvas_front.mozImageSmoothingEnabled = true;
-			pcanvas_front.msImageSmoothingEnabled = true;
-			pcanvas_front.webkitImageSmoothingEnabled = true;
-		}
-		else
-		{
-			ctx.imageSmoothingEnabled = false;
-			ctx.mozImageSmoothingEnabled = false;
-			ctx.msImageSmoothingEnabled = false;
-			ctx.webkitImageSmoothingEnabled = false;
-			pcanvas_front.imageSmoothingEnabled = false;
-			pcanvas_front.mozImageSmoothingEnabled = false;
-			pcanvas_front.msImageSmoothingEnabled = false;
-			pcanvas_front.webkitImageSmoothingEnabled = false;
-		}
-		
-		flag_bck = !flag_bck;
-	}
 	
-	// draw the background
-	ctx.drawImage(bcgrnd, 0, 0, canvas.width, canvas.height);
-}
+// image arrays
+var rl_r_bank 		= new image_bank(20, 'body/legs/reversed/r/', 10, null),
+	bgrnd_bank 		= new image_bank(19, 'back_344/', 2, rl_r_bank),
+	bgrnd_front_bank= new image_bank(18, 'back_344/front/', 2, bgrnd_bank),
+	skin_bank 		= new image_bank(17, 'skins/', 12, bgrnd_front_bank),
+	skin_r_bank 	= new image_bank(16, 'skins/reversed/', 12, skin_bank),
+	body_bank 		= new image_bank(15, 'body/body/', 10, skin_r_bank),
+	body_r_bank 	= new image_bank(14, 'body/body/reversed/', 10, body_bank),
+	head_bank 		= new image_bank(13, 'body/head/', 5, body_r_bank),
+	head_r_bank 	= new image_bank(12, 'body/head/reversed/', 5, head_bank),
+	eyes_bank 		= new image_bank(11, 'body/eyes/', 6, head_r_bank),
+	eyes_r_bank 	= new image_bank(10, 'body/eyes/reversed/', 6, eyes_bank),
+	mouth_bank 		= new image_bank(9, 'body/mouth/', 6, eyes_r_bank),
+	mouth_r_bank 	= new image_bank(8, 'body/mouth/reversed/', 6, mouth_bank),
+	lh_bank 		= new image_bank(7, 'body/hands/l/', 10, mouth_r_bank),
+	lh_r_bank 		= new image_bank(6, 'body/hands/reversed/l/', 10, lh_bank),
+	rh_bank 		= new image_bank(5, 'body/hands/r/', 10, lh_r_bank),
+	rh_r_bank 		= new image_bank(4, 'body/hands/reversed/r/', 10, rh_bank),
+	ll_bank 		= new image_bank(3, 'body/legs/l/', 10, rh_r_bank),
+	ll_r_bank 		= new image_bank(2, 'body/legs/reversed/l/', 10, ll_bank),
+	rl_bank 		= new image_bank(1, 'body/legs/r/', 10, ll_r_bank),
+	splash_bank 	= new image_bank(0, 'splash_screen/', 8, rl_bank);
 
-// some backgrounds have two layers
-bcgrnd.onload = bck;
-function bck_front()
-{
-	pcanvas_front.drawImage(bcgrnd_front, 0, 0, canvas.width, canvas.height);
-}
-bcgrnd_front.onload = bck_front;
-
-// Classes definition
-// class for keep data about npc's on canvas
+// a class for keep data about npc's on canvas and draw them
 class npc
 {
 	constructor(id)
 	{
 		this.id 		= id;
-		this.body 		= new Image();
-		this.head 		= new Image();
-		this.eyes 		= new Image();
-		this.mouth 		= new Image();
-		this.lh 		= new Image();
-		this.rh 		= new Image();
-		this.ll 		= new Image();
-		this.rl 		= new Image();
-		this.body.src 	= 'body/body/5.png';
-		this.head.src 	= 'body/head/3.png';
-		this.eyes.src 	= 'body/eyes/1.png';
-		this.mouth.src 	= 'body/mouth/6.png';
-		this.lh.src 	= 'body/hands/l4.png';
-		this.rh.src 	= 'body/hands/r4.png';
-		this.ll.src 	= 'body/legs/l5.png';
-		this.rl.src 	= 'body/legs/r5.png';
-		this.lbody 		= true;
-		this.lhead 		= true;
-		this.leyes 		= true;
-		this.lmouth 	= true;
-		this.llh 		= true;
-		this.lrh 		= true;
-		this.lll 		= true;
-		this.lrl 		= true;
-		// "p" means "position" or "pose"
-		this.bp 		= 5;
-		this.hp 		= 3;
-		this.ep 		= 1;
-		this.mp 		= 6;
-		this.lhp 		= 4;
-		this.rhp 		= 4;
-		this.llp 		= 5;
-		this.rlp 		= 5;
+		this.body 		= 5;
+		this.head 		= 3;
+		this.eyes 		= 1;
+		this.mouth 		= 6;
+		this.lh 		= 4;
+		this.rh 		= 4;
+		this.ll 		= 5;
+		this.rl 		= 5;
 		this.x 			= 0;
 		this.y 			= 0;
 		this.direction 	= 1;
-	}
-	// init draw
-	draw(ctex)
-	{
-		var xx, yy, gl_lbody, gl_lhead, gl_leyes, gl_lmouth, gl_llh, gl_lrh,
-			gl_lll, gl_lrl;
-		xx 			= this.x;
-		yy 			= this.y;
-		gl_lbody 	= this.lbody;
-		gl_lhead 	= this.lhead;
-		gl_leyes 	= this.leyes;
-		gl_lmouth 	= this.lmouth;
-		gl_llh 		= this.llh;
-		gl_lrh 		= this.lrh;
-		gl_lll 		= this.lll;
-		gl_lrl 		= this.lrl;
-		
-		this.body.onload = function()
-		{
-			// if dont use this "if", onload will be
-			// starting every time when change image src
-			if(gl_lbody)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale, 
-							   this.height * scale);
-				gl_lbody = false;
-			}
-		};
-		this.head.onload = function()
-		{
-			if(gl_lhead)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_lhead = false;
-			}
-		};
-		this.eyes.onload = function()
-		{
-			if(gl_leyes)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_leyes = false;
-			}
-		};
-		this.mouth.onload = function()
-		{
-			if(gl_lmouth)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_lmouth = false;
-			}
-		};
-		this.lh.onload = function()
-		{
-			if(gl_llh)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_llh = false;
-			}
-		};
-		this.rh.onload = function()
-		{
-			if(gl_lrh)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_lrh = false;
-			}
-		};
-		this.ll.onload = function()
-		{
-			if(gl_lll)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_lll = false;
-			}			
-		};
-		this.rl.onload = function()
-		{
-			if(gl_lrl)
-			{
-				ctex.drawImage(this, xx, yy, this.width * scale,
-							   this.height * scale);
-				gl_lrl = false;
-			}
-		};
-	}
-	move(nx, ny)
-	{
-		this.x = nx;
-		this.y = ny;
-	}
-	change_direction(pose)
-	{
-		this.direction = Number(pose);
-		if (this.direction == 1)
-		{
-			this.lh.src 	= 'body/hands/l' + this.lhp + '.png';
-			this.rh.src 	= 'body/hands/r' + this.rhp + '.png';
-			this.ll.src 	= 'body/legs/l' + this.llp + '.png';
-			this.rl.src 	= 'body/legs/r' + this.rlp + '.png';
-			this.body.src 	= 'body/body/' + this.bp + '.png';
-			this.head.src 	= 'body/head/' + this.hp + '.png';
-			this.eyes.src 	= 'body/eyes/' + this.ep + '.png';
-			this.mouth.src 	= 'body/mouth/' + this.mp + '.png';
-		}
-		else if (this.direction == 2)
-		{
-			this.lh.src 	= 'body/hands_reversed/l' + this.lhp + '.png';
-			this.rh.src 	= 'body/hands_reversed/r' + this.rhp + '.png';
-			this.ll.src 	= 'body/legs_reversed/l' + this.llp + '.png';
-			this.rl.src 	= 'body/legs_reversed/r' + this.rlp + '.png';
-			this.body.src 	= 'body/body_reversed/' + this.bp + '.png';
-			this.head.src 	= 'body/head_reversed/' + this.hp + '.png';
-			this.eyes.src 	= 'body/eyes_reversed/' + this.ep + '.png';
-			this.mouth.src 	= 'body/mouth_reversed/' + this.mp + '.png';
-		}
-	}
-	change_pose(tail, pose)
-	{
-		if (tail == "body")
-		{
-			this.bp = pose;
-		}
-		else if(tail == "head")
-		{
-			this.hp = pose;
-		}
-		else if(tail == "eyes")
-		{
-			this.ep = pose;
-		}
-		else if(tail == "mouth")
-		{
-			this.mp = pose;
-		}
-		else if(tail == "lh")
-		{
-			this.lhp = pose;
-		}
-		else if(tail == "rh")
-		{
-			this.rhp = pose;
-		}
-		else if(tail == "ll")
-		{
-			this.llp = pose;
-		}
-		else if(tail == "rl")
-		{
-			this.rlp = pose;
-		}
-		this.change_direction(this.direction);
+		this.skin 		= 0;
 	}
 	redraw(ctex)
 	{
-			ctex.drawImage(this.ll, this.x, this.y, this.ll.width * scale,
-						   this.ll.height * scale);
-			ctex.drawImage(this.body, this.x, this.y, this.body.width * scale,
-						   this.body.height * scale);
-			ctex.drawImage(this.head, this.x, this.y, this.head.width * scale,
-						   this.head.height * scale);
-			ctex.drawImage(this.eyes, this.x, this.y, this.eyes.width * scale,
-						   this.eyes.height * scale);
-			ctex.drawImage(this.mouth, this.x, this.y, this.mouth.width * scale,
-						   this.mouth.height * scale);
-			ctex.drawImage(this.lh, this.x, this.y, this.lh.width * scale,
-						   this.lh.height * scale);
-			ctex.drawImage(this.rh, this.x, this.y, this.rh.width * scale,
-						   this.rh.height * scale);
-			ctex.drawImage(this.rl, this.x, this.y, this.rl.width * scale,
-						   this.rl.height * scale);
+		if(this.direction == 1)
+		{
+			ctex.drawImage(	ll_bank.bank[this.ll - 1],
+							this.x, this.y,
+							ll_bank.bank[this.ll - 1].width * scale,
+							ll_bank.bank[this.ll - 1].height * scale);
+			ctex.drawImage(	body_bank.bank[this.body - 1],
+							this.x, this.y,
+							body_bank.bank[this.body - 1].width * scale,
+							body_bank.bank[this.body - 1].height * scale);
+			ctex.drawImage(	head_bank.bank[this.head - 1],
+							this.x, this.y,
+							head_bank.bank[this.head - 1].width * scale,
+							head_bank.bank[this.head - 1].height * scale);
+			ctex.drawImage(	eyes_bank.bank[this.eyes - 1],
+							this.x, this.y,
+							eyes_bank.bank[this.eyes - 1].width * scale,
+							eyes_bank.bank[this.eyes - 1].height * scale);
+			ctex.drawImage(	mouth_bank.bank[this.mouth - 1],
+							this.x, this.y,
+							mouth_bank.bank[this.mouth - 1].width * scale,
+							mouth_bank.bank[this.mouth - 1].height * scale);
+			ctex.drawImage(	lh_bank.bank[this.lh - 1],
+							this.x, this.y,
+							lh_bank.bank[this.lh - 1].width * scale,
+							lh_bank.bank[this.lh - 1].height * scale);
+			ctex.drawImage(	rh_bank.bank[this.rh - 1],
+							this.x, this.y,
+							rh_bank.bank[this.rh - 1].width * scale,
+							rh_bank.bank[this.rh - 1].height * scale);
+			ctex.drawImage(	rl_bank.bank[this.rl - 1],
+							this.x, this.y,
+							rl_bank.bank[this.rl - 1].width * scale,
+							rl_bank.bank[this.rl - 1].height * scale);
+			if(this.skin != 0)
+			{
+				ctex.drawImage(	skin_bank.bank[this.skin - 1],
+							this.x, this.y,
+							skin_bank.bank[this.skin - 1].width * scale,
+							skin_bank.bank[this.skin - 1].height * scale);
+			}
+		}
+		else if (this.direction == 2)
+		{
+			ctex.drawImage(	ll_r_bank.bank[this.ll - 1],
+							this.x, this.y,
+							ll_r_bank.bank[this.ll - 1].width * scale,
+							ll_r_bank.bank[this.ll - 1].height * scale);
+			ctex.drawImage(	body_r_bank.bank[this.body - 1],
+							this.x, this.y,
+							body_r_bank.bank[this.body - 1].width * scale,
+							body_r_bank.bank[this.body - 1].height * scale);
+			ctex.drawImage(	head_r_bank.bank[this.head - 1],
+							this.x, this.y,
+							head_r_bank.bank[this.head - 1].width * scale,
+							head_r_bank.bank[this.head - 1].height * scale);
+			ctex.drawImage(	eyes_r_bank.bank[this.eyes - 1],
+							this.x, this.y,
+							eyes_r_bank.bank[this.eyes - 1].width * scale,
+							eyes_r_bank.bank[this.eyes - 1].height * scale);
+			ctex.drawImage(	mouth_r_bank.bank[this.mouth - 1],
+							this.x, this.y,
+							mouth_r_bank.bank[this.mouth - 1].width * scale,
+							mouth_r_bank.bank[this.mouth - 1].height * scale);
+			ctex.drawImage(	lh_r_bank.bank[this.lh - 1],
+							this.x, this.y,
+							lh_r_bank.bank[this.lh - 1].width * scale,
+							lh_r_bank.bank[this.lh - 1].height * scale);
+			ctex.drawImage(	rh_r_bank.bank[this.rh - 1],
+							this.x, this.y,
+							rh_r_bank.bank[this.rh - 1].width * scale,
+							rh_r_bank.bank[this.rh - 1].height * scale);
+			ctex.drawImage(	rl_r_bank.bank[this.rl - 1],
+							this.x, this.y,
+							rl_r_bank.bank[this.rl - 1].width * scale,
+							rl_r_bank.bank[this.rl - 1].height * scale);
+			if(this.skin != 0)
+			{
+				ctex.drawImage(	skin_r_bank.bank[this.skin - 1],
+							this.x, this.y,
+							skin_r_bank.bank[this.skin - 1].width * scale,
+							skin_r_bank.bank[this.skin - 1].height * scale);
+			}
+		}
 	}
 }
 
@@ -610,15 +293,202 @@ class rp
 		this.y = y;
 		this.color = color
 	}
-	move(x, y)
+}
+
+// functions definition
+function canvas_sizes_init()
+{
+	canvas.style.left = lx + 'px';
+	canvas.width = rx - lx;
+	canvas.height = by;
+
+	paint.style.left = lx + 'px';
+	paint.width = rx - lx;
+	paint.height = by;
+
+	paint_bckgr.style.left = lx + 'px';
+	paint_bckgr.width = rx - lx;
+	paint_bckgr.height = by;
+
+	canvas_front.style.left = lx + 'px';
+	canvas_front.width = rx - lx;
+	canvas_front.height = by;
+}
+
+function switch_gui(boolvar)
+{
+	if(boolvar)
 	{
-		this.x = x;
-		this.y = y;
+		form_container.style.visibility = 'visible';
+		splash_c.style.visibility = 'hidden';
 	}
-	change_text(text)
+	else
 	{
-		this.text = text;
+		form_container.style.visibility = 'hidden';
+		splash_c.style.visibility = 'visible';
 	}
+}
+
+// buttons disabling/enabling
+function switch_npc_gui(boolvar)
+{
+	move_npc.disabled = !boolvar;
+	del_npc.disabled = !boolvar;
+	skin_id.disabled = !boolvar;
+	body.disabled = !boolvar;
+	head.disabled = !boolvar;
+
+	direction.disabled = !boolvar;
+	eyes.disabled = !boolvar;
+	mouth.disabled = !boolvar;
+	lh.disabled = !boolvar;
+	rh.disabled = !boolvar;
+	ll.disabled = !boolvar;
+	rl.disabled = !boolvar;
+	x.disabled = !boolvar;
+	y.disabled = !boolvar;
+}
+
+// speech disabling/enabling
+function switch_rp_gui(boolvar)
+{
+	move_rp.disabled = !boolvar;
+	del_rp.disabled = !boolvar;
+	rpx.disabled = !boolvar;
+	rpy.disabled = !boolvar;
+	change_rp_color.disabled = !boolvar;
+}
+
+// export comics button disabling/enabling
+function switch_comics_gui()
+{
+	export_comics.disabled = !export_comics.disabled;
+}
+
+function start_loading(e) {
+    move_splash_canvas();
+	continue_loading(0, e.detail.next_bank);
+	window.removeEventListener('bank_loaded', start_loading);
+}
+
+function move_splash_canvas()
+{
+	splash_c.style.left = '20%';
+	splash_c.width = sw * 0.6 - 10;
+	splash_c.height = (sw * 0.6 - 10) / 2;
+	splash_c.style.top = (sh - splash_c.height) / 2 + 'px';
+}
+
+function continue_loading(loading_status, next_bank)
+{
+	var frame = Math.floor(loading_status * (splash_bank.number / 20));
+	splash_ctx.drawImage(
+splash_bank.bank[frame], 0, 0, splash_c.width, splash_c.height);
+	window.addEventListener('bank_loaded', function (e)
+	{
+		continue_loading(e.detail.loading_status, e.detail.next_bank);
+		window.removeEventListener('bank_loaded', arguments.callee, false);
+	});
+	next_bank.start_loading(loading_status);
+}
+
+function finish_loading()
+{
+	splash_ctx.drawImage(splash_bank.bank[splash_bank.number - 1],
+						 0, 0, splash_c.width, splash_c.height);
+	clearTimeout(timer_splash);
+	
+	switch_gui(true);
+
+	// backgrounds
+	i = 1;
+	while(i <= bgrnd_bank.number)
+	{
+		var option = document.createElement("option");
+		option.text = i + '';
+		back_change.add(option);
+		i = i + 1;
+	}
+	back_change.selectedIndex = 1;
+	
+	// painting layers
+	i = 1;
+	while(i <= number_of_layers)
+	{
+		var option = document.createElement("option");
+		option.text = i + '';
+		brush_layer.add(option);
+		i = i + 1;
+	}
+	brush_layer.selectedIndex = 1;
+	brush_layer_n = brush_layer.selectedIndex;
+	
+	// skin
+	i = 1;
+	while(i <= skin_bank.number)
+	{
+		var option = document.createElement("option");
+		option.text = i + '';
+		skin_id.add(option);
+		i = i + 1;
+	}
+	skin_id.selectedIndex = 0;
+
+	// disabling
+	switch_npc_gui(false);
+	switch_rp_gui();
+	switch_comics_gui();
+
+	// sizes changing
+	canvas_sizes_init();
+
+	// turn on smooth
+	switch_smooth(false);
+
+	// init draw
+	draw_background(ctx);
+	draw_front_background(pcanvas_front);
+	
+	// gui init values
+	x.value = 0;
+	y.value = 0;
+	lh.value = 1;
+	rh.value = 1;
+	ll.value = 1;
+	rl.value = 1;
+	body.value = 1;
+	head.value = 1;
+	eyes.value = 1;
+	mouth.value = 1;
+	rpx.value = 0;
+	rpy.value = 0;
+	rp_text.value = "";
+	frames_number.value = "";
+	comics_export_format.disabled = true;
+}
+
+function switch_smooth(boolvar)
+{
+	ctx.imageSmoothingEnabled = boolvar;
+	ctx.mozImageSmoothingEnabled = boolvar;
+	ctx.msImageSmoothingEnabled = boolvar;
+	ctx.webkitImageSmoothingEnabled = boolvar;
+	pcanvas_front.imageSmoothingEnabled = boolvar;
+	pcanvas_front.mozImageSmoothingEnabled = boolvar;
+	pcanvas_front.msImageSmoothingEnabled = boolvar;
+	pcanvas_front.webkitImageSmoothingEnabled = boolvar;
+}
+
+function draw_background(ctex)
+{
+	ctex.drawImage(bgrnd_bank.bank[back_change.selectedIndex - 1],
+				   0, 0, canvas.width, canvas.height);
+}
+
+function draw_front_background(ctex)
+{
+	ctex.drawImage(bgrnd_front_bank.bank[back_change.selectedIndex - 1],
+				   0, 0, canvas.width, canvas.height);
 }
 
 // render function called every time when
@@ -626,7 +496,7 @@ class rp
 function render()
 {
 	// layer 0
-	bck();
+	draw_background(ctx);
 	
 	// layer 1
 	// clear
@@ -638,7 +508,7 @@ function render()
 		npcs[n - 2].redraw(pcanvas_front);
 		n = n - 1;
 	}
-	bck_front();
+	draw_front_background(pcanvas_front);
 	// current number of speechs
 	n = rps.length;
 	while(n > 0)
@@ -657,7 +527,21 @@ function render()
 	}
 }
 
-// Description of the interactive part of the gui
+// GUI init
+/*
+// stupid try to rendering when its really needs
+form_container.addEventListener('mousemove', function(event)
+{
+	
+	render();
+});
+*/
+
+// loading
+window.addEventListener('bank_loaded', start_loading);
+splash_bank.start_loading(0);
+
+// Description of the interactive part of the gui (EventListeners)
 
 hide_button.addEventListener('click', function(event)
 {
@@ -668,7 +552,6 @@ hide_button.addEventListener('click', function(event)
 		hide_button.value = 'Свернуть';
 		container_hiding.style.visibility = 'visible';
 		hided = false;
-		//console.log('edtitor showed');
 	}
 	else
 	{
@@ -677,7 +560,6 @@ hide_button.addEventListener('click', function(event)
 		hide_button.value = 'Показать';
 		container_hiding.style.visibility = 'hidden';
 		hided = true;
-		//console.log('editor hided');
 	}
 });
 
@@ -701,32 +583,29 @@ add_npc.addEventListener('click', function(event)
 	npc_id.add(option);
 	
 	// create new npc
-	npcs[number_of_npc - 1].move(90 * scale, 60 * scale);
-	npcs[number_of_npc - 1].draw(pcanvas_front);
+	npcs[number_of_npc - 1].x = 90 * scale;
+	npcs[number_of_npc - 1].y = 60 * scale;
+	render();
 	
 	// updating all gui to the default values
 	npc_id.selectedIndex = npc_id.length - 1;
-	switch_npc_gui();
+	switch_npc_gui(true);
 	x.value = (npcs[npc_id.selectedIndex - 1].x + 27 * scale) / (scale * 3.05);
 	y.value = (npcs[npc_id.selectedIndex - 1].y + 22 * scale) / (scale * 1.26);
-	lh.value = npcs[npc_id.selectedIndex - 1].lhp;
-	rh.value = npcs[npc_id.selectedIndex - 1].rhp;
-	ll.value = npcs[npc_id.selectedIndex - 1].llp;
-	rl.value = npcs[npc_id.selectedIndex - 1].rlp;
-	body.value = npcs[npc_id.selectedIndex - 1].bp;
-	head.value = npcs[npc_id.selectedIndex - 1].hp;
-	eyes.value = npcs[npc_id.selectedIndex - 1].ep;
-	mouth.value = npcs[npc_id.selectedIndex - 1].mp;
+	lh.value = npcs[npc_id.selectedIndex - 1].lh;
+	rh.value = npcs[npc_id.selectedIndex - 1].rh;
+	ll.value = npcs[npc_id.selectedIndex - 1].ll;
+	rl.value = npcs[npc_id.selectedIndex - 1].rl;
+	body.value = npcs[npc_id.selectedIndex - 1].body;
+	head.value = npcs[npc_id.selectedIndex - 1].head;
+	eyes.value = npcs[npc_id.selectedIndex - 1].eyes;
+	mouth.value = npcs[npc_id.selectedIndex - 1].mouth;
 	direction.value = npcs[npc_id.selectedIndex - 1].direction;
-	
-	// yep, this is a timer((
-	// idk how to effectively redraw the image in another way
-	setTimeout(render, 250);
 });
 
 npc_id.addEventListener('input', function(event)
 {
-	// this and every next time "if" checks what option selected in list
+	// here and every next time "if" checks what option selected in list
 	if(npc_id.selectedIndex > 0)
 	{
 		// updating all gui to the actual values
@@ -734,26 +613,36 @@ npc_id.addEventListener('input', function(event)
 (npcs[npc_id.selectedIndex - 1].x + 27 * scale) / (scale * 3.05);
 		y.value =
 (npcs[npc_id.selectedIndex - 1].y + 22 * scale) / (scale * 1.26);
-		lh.value = npcs[npc_id.selectedIndex - 1].lhp;
-		rh.value = npcs[npc_id.selectedIndex - 1].rhp;
-		ll.value = npcs[npc_id.selectedIndex - 1].llp;
-		rl.value = npcs[npc_id.selectedIndex - 1].rlp;
-		body.value = npcs[npc_id.selectedIndex - 1].bp;
-		head.value = npcs[npc_id.selectedIndex - 1].hp;
-		eyes.value = npcs[npc_id.selectedIndex - 1].ep;
-		mouth.value = npcs[npc_id.selectedIndex - 1].mp;
-		switch_npc_gui();
+		lh.value = npcs[npc_id.selectedIndex - 1].lh;
+		rh.value = npcs[npc_id.selectedIndex - 1].rh;
+		ll.value = npcs[npc_id.selectedIndex - 1].ll;
+		rl.value = npcs[npc_id.selectedIndex - 1].rl;
+		body.value = npcs[npc_id.selectedIndex - 1].body;
+		head.value = npcs[npc_id.selectedIndex - 1].head;
+		eyes.value = npcs[npc_id.selectedIndex - 1].eyes;
+		mouth.value = npcs[npc_id.selectedIndex - 1].mouth;
+		switch_npc_gui(true);
 	}
 	else
 	{
+		x.value = 0;
+		y.value = 0;
+		lh.value = 1;
+		rh.value = 1;
+		ll.value = 1;
+		rl.value = 1;
+		body.value = 1;
+		head.value = 1;
+		eyes.value = 1;
+		mouth.value = 1;
 		move_npc.value = "Двигать";
-		switch_npc_gui();
+		switch_npc_gui(false);
 		cmoving = false;
 	}
 });
 
-var npc_mouse = { x:0, y:0};
-var npc_delta = { x:0, y:0};
+var npc_mouse = { x:0, y:0 };
+var npc_delta = { x:0, y:0 };
 var moving = false, cmoving = false;
 
 move_npc.addEventListener('click', function(event)
@@ -794,14 +683,20 @@ paint.addEventListener("mousemove", function(e)
 	{
 		if(moving==true)
 		{
-			x_val = (npcs[npc_id.selectedIndex - 1].x + npc_delta.x + 27 * scale) / (scale * 3.05);
-			y_val = (npcs[npc_id.selectedIndex - 1].y + npc_delta.y + 22 * scale) / (scale * 1.26);
+			x_val = (
+npcs[npc_id.selectedIndex - 1].x + npc_delta.x + 27 * scale) / (scale * 3.05);
+			y_val = (
+npcs[npc_id.selectedIndex - 1].y + npc_delta.y + 22 * scale) / (scale * 1.26);
 			
 			if (x_val > 0 && x_val < 100 && y_val > 0 && y_val < 100)
 			{
 				npc_delta.x = e.pageX - this.offsetLeft - npc_mouse.x;
 				npc_delta.y = e.pageY - this.offsetTop - npc_mouse.y;
-				npcs[npc_id.selectedIndex - 1].move(npcs[npc_id.selectedIndex - 1].x + npc_delta.x, npcs[npc_id.selectedIndex - 1].y + npc_delta.y);
+				npcs[npc_id.selectedIndex - 1]
+				npcs[npc_id.selectedIndex - 1].x
+				= npcs[npc_id.selectedIndex - 1].x + npc_delta.x;
+				npcs[npc_id.selectedIndex - 1].y
+				= npcs[npc_id.selectedIndex - 1].y + npc_delta.y;
 				render();
 				npc_mouse.x = e.pageX - this.offsetLeft;
 				npc_mouse.y = e.pageY - this.offsetTop;
@@ -810,7 +705,10 @@ paint.addEventListener("mousemove", function(e)
 			}
 			else
 			{
-				npcs[npc_id.selectedIndex - 1].move(npcs[npc_id.selectedIndex - 1].x - npc_delta.x, npcs[npc_id.selectedIndex - 1].y - npc_delta.y);
+				npcs[npc_id.selectedIndex - 1].x
+				= npcs[npc_id.selectedIndex - 1].x - npc_delta.x;
+				npcs[npc_id.selectedIndex - 1].y
+				= npcs[npc_id.selectedIndex - 1].y - npc_delta.y;
 				render();
 			}
 			
@@ -854,27 +752,22 @@ del_npc.addEventListener('click', function(event)
 		render();
 		
 		move_npc.value = "Двигать";
-		move_npc.disabled = true;
-		del_npc.disabled = true;
+		switch_npc_gui(false);
 		cmoving = false;
 	}
 });
 
-
-skin.addEventListener('click', function(event)
+skin_id.addEventListener('input', function(event)
 {
-	if(npc_id.selectedIndex > 0)
-	{
-		
-	}
+	npcs[npc_id.selectedIndex - 1].skin = skin_id.value;
+	render();
 });
-
 
 body.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, body.value);
+		npcs[npc_id.selectedIndex - 1].body = body.value;
 		render();
 	}
 });
@@ -883,7 +776,7 @@ head.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, head.value);
+		npcs[npc_id.selectedIndex - 1].head = head.value;
 		render();
 	}
 });
@@ -896,7 +789,8 @@ x.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].move((Number(x.value) * scale * 3.05 - 27 * scale), npcs[npc_id.selectedIndex - 1].y);
+		npcs[npc_id.selectedIndex - 1].x
+= Number(x.value) * scale * 3.05 - 27 * scale;
 		render();
 	}
 });
@@ -905,67 +799,17 @@ y.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].move(npcs[npc_id.selectedIndex - 1].x, (Number(y.value) * scale * 1.26 - 22 * scale));
+		npcs[npc_id.selectedIndex - 1].y
+= Number(y.value) * scale * 1.26 - 22 * scale;
 		render();
 	}
 });
-
-
-
-back_change.addEventListener('input', function(event)
-{
-	if(back_change.selectedIndex > 0)
-	{
-		
-		bcgrnd.src = 'back_344/' + back_change.value + '.png';
-		bcgrnd_front.src = 'back_344/' + back_change.value + '_2.png';
-		render();
-	}
-});
-
-lh.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, lh.value);
-		render();
-	}
-});
-
-rh.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, rh.value);
-		render();
-	}
-});
-
-ll.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, ll.value);
-		render();
-	}
-});
-
-rl.addEventListener('input', function(event)
-{
-	if(npc_id.selectedIndex > 0)
-	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, rl.value);
-		render();
-	}
-});
-
-
 
 direction.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].change_direction(direction.value);
+		npcs[npc_id.selectedIndex - 1].direction = Number(direction.value);
 		render();
 	}
 });
@@ -974,7 +818,7 @@ eyes.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, eyes.value);
+		npcs[npc_id.selectedIndex - 1].eyes = Number(eyes.value);
 		render();
 	}
 });
@@ -983,14 +827,75 @@ mouth.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].change_pose(this.id, mouth.value);
+		npcs[npc_id.selectedIndex - 1].mouth = Number(mouth.value);
 		render();
 	}
 });
 
-form_container.addEventListener('mousemove', function(event)
+lh.addEventListener('input', function(event)
 {
-	// stupid try to rendering when its really needs
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].lh = Number(lh.value);
+		render();
+	}
+});
+
+rh.addEventListener('input', function(event)
+{
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].rh = Number(rh.value);
+		render();
+	}
+});
+
+ll.addEventListener('input', function(event)
+{
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].ll = Number(ll.value);
+		render();
+	}
+});
+
+rl.addEventListener('input', function(event)
+{
+	if(npc_id.selectedIndex > 0)
+	{
+		npcs[npc_id.selectedIndex - 1].rl = Number(rl.value);
+		render();
+	}
+});
+
+// ----------------------------------------------------------------------------
+// BACKGROUND
+// ----------------------------------------------------------------------------
+
+back_change.addEventListener('input', function(event)
+{
+	if(back_change.selectedIndex > 0)
+	{
+		render();
+	}
+});
+
+// ----------------------------------------------------------------------------
+// MODIFICATIONS
+// ----------------------------------------------------------------------------
+
+smooth.addEventListener('click', function (e)
+{
+	if (smooth.value == 'Выключить сглаживание')
+	{
+		smooth.value = 'Включить сглаживание';
+		switch_smooth(false);
+	}
+	else
+	{
+		smooth.value = 'Выключить сглаживание';
+		switch_smooth(true);
+	}
 	render();
 });
 
@@ -1149,20 +1054,105 @@ clear.addEventListener('click', function(event)
 	}
 });
 
+// ----------------------------------------------------------------------------
+// RP EDITOR
+// ----------------------------------------------------------------------------
+
 add_rp.addEventListener('click', function(event)
 {
+	// updating counters
 	number_of_rp = number_of_rp + 1;
 	rp_counter = rp_counter + 1;
 	
-	var nrp = new rp(rp_text.value, Number(rpx.value) * scale * 3.30, Number(rpy.value) * scale * 1.96 + 13 * scale, color);
+	// updating array of rp
+	var nrp = new rp(rp_text.value,
+					 Number(rpx.value) * scale * 3.30,
+					 Number(rpy.value) * scale * 1.96 + 13 * scale,
+					 color);
 	rps[number_of_rp - 1] = nrp;
 	
+	// draw new rp
+	render();
+	
+	// updating list of rp on a gui
 	var option = document.createElement("option");
 	option.text = '' + rp_counter;
 	rp_id.add(option);
-	rp_id.selectedIndex = rp_id.length - 1;
 	
-	render();
+	// updating all gui to the default values
+	rp_id.selectedIndex = rp_id.length - 1;
+	switch_rp_gui(true);
+	rpx.value = (rps[rp_id.selectedIndex - 1].x) / (scale * 3.30);
+	rpy.value
+= (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
+	
+});
+
+rp_id.addEventListener('input', function(event)
+{
+	if(rp_id.selectedIndex > 0)
+	{
+		// updating all gui to the actual values
+		rpx.value = (rps[rp_id.selectedIndex - 1].x) / (scale * 3.30);
+		rpy.value
+= (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
+		switch_rp_gui(true);
+	}
+	else
+	{
+		rpx.value = 0;
+		rpy.value = 0;
+		move_rp.value = "Двигать";
+		switch_rp_gui(false);
+		rp_cmoving = false;
+	}
+});
+
+rp_text.addEventListener('input', function(event)
+{
+	if(rp_id.selectedIndex > 0)
+	{
+		rps[rp_id.selectedIndex - 1].text = rp_text.value;
+		render();
+	}
+});
+
+del_rp.addEventListener('click', function(event)
+{
+	if(rp_id.selectedIndex > 0)
+	{
+		rps.splice(rp_id.selectedIndex - 1, 1);
+		
+		rp_id.remove(rp_id.selectedIndex);
+		rp_id.selectedIndex = 0;
+		
+		number_of_rp = number_of_rp - 1;
+		
+		render();
+		
+		move_rp.value = "Двигать";
+		switch_rp_gui(false);
+		rp_cmoving = false;
+	}
+});
+
+rpx.addEventListener('input', function(event)
+{
+	if(rp_id.selectedIndex > 0)
+	{
+		rps[rp_id.selectedIndex - 1].x = Number(rpx.value) * scale * 3.30;
+		render();
+	}
+});
+
+rpy.addEventListener('input', function(event)
+{
+	if(rp_id.selectedIndex > 0)
+	{
+		rps[rp_id.selectedIndex - 1].y
+= Number(rpy.value) * scale * 1.96 + 13 * scale;
+		render();
+	}
 });
 
 var rp_mouse = { x:0, y:0};
@@ -1208,13 +1198,17 @@ paint.addEventListener("mousemove", function(e)
 		if(rp_moving==true)
 		{
 			x_val = (rps[rp_id.selectedIndex - 1].x) / (scale * 3.30);
-			y_val = (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
+			y_val
+= (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
 			
 			if (x_val > 0 && x_val < 100 && y_val > 0 && y_val < 100)
 			{
 				rp_delta.x = e.pageX - this.offsetLeft - rp_mouse.x;
 				rp_delta.y = e.pageY - this.offsetTop - rp_mouse.y;
-				rps[rp_id.selectedIndex - 1].move(rps[rp_id.selectedIndex - 1].x + rp_delta.x, rps[rp_id.selectedIndex - 1].y + rp_delta.y)
+				rps[rp_id.selectedIndex - 1].x
+= rps[rp_id.selectedIndex - 1].x + rp_delta.x;
+				rps[rp_id.selectedIndex - 1].y
+= rps[rp_id.selectedIndex - 1].y + rp_delta.y;
 				render();
 				rp_mouse.x = e.pageX - this.offsetLeft;
 				rp_mouse.y = e.pageY - this.offsetTop;
@@ -1223,10 +1217,12 @@ paint.addEventListener("mousemove", function(e)
 			}
 			else
 			{
-				rps[rp_id.selectedIndex - 1].move(rps[rp_id.selectedIndex - 1].x - rp_delta.x, rps[rp_id.selectedIndex - 1].y - rp_delta.y)
+				rps[rp_id.selectedIndex - 1].x
+= rps[rp_id.selectedIndex - 1].x - rp_delta.x;
+				rps[rp_id.selectedIndex - 1].y
+= rps[rp_id.selectedIndex - 1].y - rp_delta.y;
 				render();
 			}
-			
 		}
 	}
 });
@@ -1251,26 +1247,12 @@ paint.addEventListener("mouseleave", function(e)
 	}
 });
 
-del_rp.addEventListener('click', function(event)
-{
-	if(rp_id.selectedIndex > 0)
-	{
-		rps.splice(rp_id.selectedIndex - 1, 1);
-		
-		rp_id.remove(rp_id.selectedIndex);
-		rp_id.selectedIndex = 0;
-		
-		number_of_rp = number_of_rp - 1;
-		
-		render();
-	}
-});
-
 change_rp_color.addEventListener('click', function(event)
 {
 	if(rp_id.selectedIndex > 0)
 	{
-		rps[rp_id.selectedIndex - 1].color = !rps[rp_id.selectedIndex - 1].color;
+		rps[rp_id.selectedIndex - 1].color
+= !rps[rp_id.selectedIndex - 1].color;
 		color = !color;
 		
 		render();
@@ -1281,49 +1263,14 @@ change_rp_color.addEventListener('click', function(event)
 	}
 });
 
-rp_id.addEventListener('input', function(event)
-{
-	if(rp_id.selectedIndex > 0)
-	{
-		rpx.value = (rps[rp_id.selectedIndex - 1].x) / (scale * 3.30);
-		rpy.value = (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
-	}
-	else
-	{
-		move_rp.value = "Не двигать";
-		rp_cmoving = true;
-	}
-});
-
-rpx.addEventListener('input', function(event)
-{
-	if(rp_id.selectedIndex > 0)
-	{
-		rps[rp_id.selectedIndex - 1].move(Number(rpx.value) * scale * 3.30, rps[rp_id.selectedIndex - 1].y);
-		render();
-	}
-});
-
-rpy.addEventListener('input', function(event)
-{
-	if(rp_id.selectedIndex > 0)
-	{
-		rps[rp_id.selectedIndex - 1].move(rps[rp_id.selectedIndex - 1].x, Number(rpy.value) * scale * 1.96 + 13 * scale);
-		render();
-	}
-});
-
-rp_text.addEventListener('input', function(event)
-{
-	if(rp_id.selectedIndex > 0)
-	{
-		rps[rp_id.selectedIndex - 1].change_text(rp_text.value);
-		render();
-	}
-});
+// ----------------------------------------------------------------------------
+// EXPORT FRAME
+// ----------------------------------------------------------------------------
 
 export_png.addEventListener('click', function (e)
 {
+	var smooth_enabled = (smooth.value == 'Выключить сглаживание');
+	
 	frame_counter = frame_counter + 1;
 	
 	// merge layers
@@ -1331,8 +1278,13 @@ export_png.addEventListener('click', function (e)
 	ctx.drawImage(canvas_front, 0, 0);
 	ctx.drawImage(paint, 0, 0);
 	
-    Canvas2Image.saveAsPNG(canvas, ctx.width, ctx.height, frame_counter + '.png', smooth_enabled);
+    Canvas2Image.saveAsPNG(
+canvas, ctx.width, ctx.height, frame_counter + '.png', smooth_enabled);
 });
+
+// ----------------------------------------------------------------------------
+// CREATE COMICS
+// ----------------------------------------------------------------------------
 
 show_upload_btns.addEventListener('click', function(event)
 {
@@ -1408,6 +1360,8 @@ show_upload_btns.addEventListener('click', function(event)
 
 export_comics.addEventListener('click', function (e)
 {
+	var smooth_enabled = (smooth.value == 'Выключить сглаживание');
+	
 	cc_ctx.clearRect(0, 0, comics_canvas.width, comics_canvas.height);
 	var i = 0;
 	while(i < frames_number.value)
@@ -1418,35 +1372,3 @@ export_comics.addEventListener('click', function (e)
 	Canvas2Image.saveAsPNG(comics_canvas, comics_canvas.width, comics_canvas.height, comics_counter + '.png', smooth_enabled);
 	comics_counter = comics_counter + 1;
 });
-
-smooth.addEventListener('click', function (e)
-{
-	if (smooth_enabled)
-	{
-		smooth.value = 'Включить сглаживание';
-		ctx.imageSmoothingEnabled = false;
-		ctx.mozImageSmoothingEnabled = false;
-		ctx.msImageSmoothingEnabled = false;
-		ctx.webkitImageSmoothingEnabled = false;
-		pcanvas_front.imageSmoothingEnabled = false;
-		pcanvas_front.mozImageSmoothingEnabled = false;
-		pcanvas_front.msImageSmoothingEnabled = false;
-		pcanvas_front.webkitImageSmoothingEnabled = false;
-		smooth_enabled = false;
-	}
-	else
-	{
-		smooth.value = 'Выключить сглаживание';
-		ctx.imageSmoothingEnabled = true;
-		ctx.mozImageSmoothingEnabled = true;
-		ctx.msImageSmoothingEnabled = true;
-		ctx.webkitImageSmoothingEnabled = true;
-		pcanvas_front.imageSmoothingEnabled = true;
-		pcanvas_front.mozImageSmoothingEnabled = true;
-		pcanvas_front.msImageSmoothingEnabled = true;
-		pcanvas_front.webkitImageSmoothingEnabled = true;
-		smooth_enabled = true;
-	}
-	render();
-});
-*/
