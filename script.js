@@ -360,9 +360,9 @@ function switch_rp_gui(boolvar)
 }
 
 // export comics button disabling/enabling
-function switch_comics_gui()
+function switch_comics_gui(boolvar)
 {
-	export_comics.disabled = !export_comics.disabled;
+	export_comics.disabled = !boolvar;
 }
 
 function start_loading(e) {
@@ -384,11 +384,12 @@ function continue_loading(loading_status, next_bank)
 	var frame = Math.floor(loading_status * (splash_bank.number / 20));
 	splash_ctx.drawImage(
 splash_bank.bank[frame], 0, 0, splash_c.width, splash_c.height);
-	window.addEventListener('bank_loaded', function (e)
+	var loading_listener = function (e)
 	{
 		continue_loading(e.detail.loading_status, e.detail.next_bank);
-		window.removeEventListener('bank_loaded', arguments.callee, false);
-	});
+		window.removeEventListener('bank_loaded', loading_listener);
+	}
+	window.addEventListener('bank_loaded', loading_listener);
 	next_bank.start_loading(loading_status);
 }
 
@@ -436,8 +437,8 @@ function finish_loading()
 
 	// disabling
 	switch_npc_gui(false);
-	switch_rp_gui();
-	switch_comics_gui();
+	switch_rp_gui(false);
+	switch_comics_gui(false);
 
 	// sizes changing
 	canvas_sizes_init();
@@ -692,7 +693,6 @@ npcs[npc_id.selectedIndex - 1].y + npc_delta.y + 22 * scale) / (scale * 1.26);
 			{
 				npc_delta.x = e.pageX - this.offsetLeft - npc_mouse.x;
 				npc_delta.y = e.pageY - this.offsetTop - npc_mouse.y;
-				npcs[npc_id.selectedIndex - 1]
 				npcs[npc_id.selectedIndex - 1].x
 				= npcs[npc_id.selectedIndex - 1].x + npc_delta.x;
 				npcs[npc_id.selectedIndex - 1].y
@@ -1322,14 +1322,16 @@ show_upload_btns.addEventListener('click', function(event)
 							if(flag_ctx_sizes_corrected)
 							{
 								comics_canvas.width = this.width;
-								comics_canvas.height = this.height * Number(frames_number.value) - 0.024 * this.height * (Number(frames_number.value) - 1);
+								comics_canvas.height = this.height * Number(
+frames_number.value) - 0.024 * this.height * (Number(frames_number.value) - 1);
 								cc_ctx.imageSmoothingEnabled = false;
 								cc_ctx.mozImageSmoothingEnabled = false;
 								cc_ctx.msImageSmoothingEnabled = false;
 								cc_ctx.webkitImageSmoothingEnabled = false;
 								flag_ctx_sizes_corrected = false;
 							}
-							cc_ctx.drawImage(this, 0, Number(this.id) * this.height - 0.024 * this.height * Number(this.id));
+							cc_ctx.drawImage(
+this, 0, Number(this.id) * this.height - 0.024* this.height * Number(this.id));
 						};
 					};
 					reader.readAsDataURL(input.files[0]);
