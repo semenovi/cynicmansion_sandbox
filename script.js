@@ -1,6 +1,8 @@
 // get the elements for the gui
 // getting canvases
 var canvas				= document.getElementById("scr"),
+	paint_bckgr_buf 	=document.getElementById('paint_bckgr_pixelate_buffer'),
+	paint_buf 			= document.getElementById('paint_pixelate_buffer'),
 	paint_bckgr			= document.getElementById("paint_bckgr"),
 	canvas_front		= document.getElementById("scr_2"),
 	paint				= document.getElementById("paint"),
@@ -9,6 +11,8 @@ var canvas				= document.getElementById("scr"),
 		
 // getting their context
 var ctx					= canvas.getContext('2d'),
+	ppaint_bckgr_buf 	= paint_bckgr_buf.getContext('2d'),
+	ppaint_buf 			= paint_buf.getContext('2d'),
 	pctx				= paint.getContext('2d'),
 	ppaint_bckgr		= paint_bckgr.getContext('2d'),
 	pcanvas_front		= canvas_front.getContext('2d'),
@@ -49,6 +53,7 @@ var hide_button 		= document.getElementById("hide"),
 	smooth 				= document.getElementById("smooth"),
 	brush 				= document.getElementById("brush"),
 	brush_layer 		= document.getElementById("brush_layer"),
+	brush_color_text 	= document.getElementById("brush_color_text"),
 	change_brush_color 	= document.getElementById("change_brush_color"),
 	clear 				= document.getElementById("clear"),
 	
@@ -77,7 +82,7 @@ var hide_button 		= document.getElementById("hide"),
 var hided 				= false, // are gui hided?
 	btns_hided 			= true, // are buttons for upload hided?
 	color 				= true, // are black color using for current speech?
-	brush_color 		= true, // are black color using for painting on canvas?
+	brush_color 		= "#000000",
 	sw 					= window.innerWidth,
 	sh 					= window.innerHeight,
 	number_of_npc 		= 0,	// number and counter have a differense:
@@ -153,27 +158,57 @@ finish_loading, Math.floor(Math.random() * (5000 - 3000 + 1)) + 3000);
 }
 	
 // image arrays
-var rl_r_bank 		= new image_bank(20, 'body/legs/reversed/r/', 10, null),
-	bgrnd_bank 		= new image_bank(19, 'back_344/', 2, rl_r_bank),
-	bgrnd_front_bank= new image_bank(18, 'back_344/front/', 2, bgrnd_bank),
-	skin_bank 		= new image_bank(17, 'skins/', 12, bgrnd_front_bank),
-	skin_r_bank 	= new image_bank(16, 'skins/reversed/', 12, skin_bank),
-	body_bank 		= new image_bank(15, 'body/body/', 10, skin_r_bank),
-	body_r_bank 	= new image_bank(14, 'body/body/reversed/', 10, body_bank),
-	head_bank 		= new image_bank(13, 'body/head/', 5, body_r_bank),
-	head_r_bank 	= new image_bank(12, 'body/head/reversed/', 5, head_bank),
-	eyes_bank 		= new image_bank(11, 'body/eyes/', 6, head_r_bank),
-	eyes_r_bank 	= new image_bank(10, 'body/eyes/reversed/', 6, eyes_bank),
-	mouth_bank 		= new image_bank(9, 'body/mouth/', 6, eyes_r_bank),
-	mouth_r_bank 	= new image_bank(8, 'body/mouth/reversed/', 6, mouth_bank),
-	lh_bank 		= new image_bank(7, 'body/hands/l/', 10, mouth_r_bank),
-	lh_r_bank 		= new image_bank(6, 'body/hands/reversed/l/', 10, lh_bank),
-	rh_bank 		= new image_bank(5, 'body/hands/r/', 10, lh_r_bank),
-	rh_r_bank 		= new image_bank(4, 'body/hands/reversed/r/', 10, rh_bank),
-	ll_bank 		= new image_bank(3, 'body/legs/l/', 10, rh_r_bank),
-	ll_r_bank 		= new image_bank(2, 'body/legs/reversed/l/', 10, ll_bank),
-	rl_bank 		= new image_bank(1, 'body/legs/r/', 10, ll_r_bank),
-	splash_bank 	= new image_bank(0, 'splash_screen/', 8, rl_bank);
+var rl_r_bank 		= new image_bank(39, 'body/legs/reversed/r/', 10, null),
+
+	bgrnd_bank 		= new image_bank(38, 'back_344/', 3, rl_r_bank),
+	bgrnd_front_bank= new image_bank(37, 'back_344/front/', 3, bgrnd_bank),
+	
+	skin_bank 		= new image_bank(36, 'skins/', 12, bgrnd_front_bank),
+	skin_u_bank 	= new image_bank(35, 'skins/up/', 12, skin_bank),
+	skin_b_bank 	= new image_bank(34, 'skins/bottom/', 12, skin_u_bank),
+	skin_r_bank 	= new image_bank(33, 'skins/reversed/', 12, skin_b_bank),
+	
+	body_bank 		= new image_bank(32, 'body/body/', 10, skin_r_bank),
+	body_u_bank 	= new image_bank(31, 'body/body/up/', 10, body_bank),
+	body_b_bank 	= new image_bank(30, 'body/body/bottom/', 10, body_u_bank),
+	body_r_bank 	= new image_bank(29, 'body/body/reversed/', 10,body_b_bank),
+	
+	head_bank 		= new image_bank(28, 'body/head/', 5, body_r_bank),
+	head_u_bank 	= new image_bank(27, 'body/head/up/', 5, head_bank),
+	head_b_bank 	= new image_bank(26, 'body/head/bottom/', 5, head_u_bank),
+	head_r_bank 	= new image_bank(25, 'body/head/reversed/', 5,head_b_bank),
+	
+	eyes_bank 		= new image_bank(24, 'body/eyes/', 6, head_r_bank),
+	eyes_u_bank 	= new image_bank(23, 'body/eyes/up/', 6, eyes_bank),
+	eyes_b_bank 	= new image_bank(22, 'body/eyes/bottom/', 6, eyes_u_bank),
+	eyes_r_bank 	= new image_bank(21, 'body/eyes/reversed/', 6,eyes_b_bank),
+	
+	mouth_bank 		= new image_bank(20, 'body/mouth/', 6, eyes_r_bank),
+	mouth_u_bank 	= new image_bank(19, 'body/mouth/up/', 6, mouth_bank),
+	mouth_b_bank 	= new image_bank(18, 'body/mouth/bottom/', 6, mouth_u_bank),
+	mouth_r_bank 	= new image_bank(17, 'body/mouth/reversed/',6,mouth_b_bank),
+	
+	lh_bank 		= new image_bank(16, 'body/hands/l/', 10, mouth_r_bank),
+	lh_u_bank 		= new image_bank(15, 'body/hands/up/l/', 10, lh_bank),
+	lh_b_bank 		= new image_bank(14, 'body/hands/bottom/l/', 10, lh_u_bank),
+	lh_r_bank 		= new image_bank(13, 'body/hands/reversed/l/',10,lh_b_bank),
+	
+	rh_bank 		= new image_bank(12, 'body/hands/r/', 10, lh_r_bank),
+	rh_u_bank 		= new image_bank(11, 'body/hands/up/r/', 10, rh_bank),
+	rh_b_bank 		= new image_bank(10, 'body/hands/bottom/r/', 10,rh_u_bank),
+	rh_r_bank 		= new image_bank(9, 'body/hands/reversed/r/', 10,rh_b_bank),
+	
+	ll_bank 		= new image_bank(8, 'body/legs/l/', 10, rh_r_bank),
+	ll_u_bank 		= new image_bank(7, 'body/legs/up/l/', 10, ll_bank),
+	ll_b_bank 		= new image_bank(6, 'body/legs/bottom/l/', 10, ll_u_bank),
+	ll_r_bank 		= new image_bank(5, 'body/legs/reversed/l/', 10, ll_b_bank),
+	
+	rl_bank 		= new image_bank(4, 'body/legs/r/', 10, ll_r_bank),
+	rl_u_bank 		= new image_bank(3, 'body/legs/up/r/', 10, rl_bank),
+	rl_b_bank 		= new image_bank(2, 'body/legs/bottom/r/', 10, rl_u_bank),
+	rl_r_bank 		= new image_bank(1, 'body/legs/reversed/r/', 10, rl_b_bank),
+	
+	splash_bank 	= new image_bank(0, 'splash_screen/', 8, rl_r_bank);
 
 // a class for keep data about npc's on canvas and draw them
 class npc
@@ -239,6 +274,90 @@ class npc
 			}
 		}
 		else if (this.direction == 2)
+		{
+			ctex.drawImage(	ll_u_bank.bank[this.ll - 1],
+							this.x, this.y,
+							ll_u_bank.bank[this.ll - 1].width * scale,
+							ll_u_bank.bank[this.ll - 1].height * scale);
+			ctex.drawImage(	body_u_bank.bank[this.body - 1],
+							this.x, this.y,
+							body_u_bank.bank[this.body - 1].width * scale,
+							body_u_bank.bank[this.body - 1].height * scale);
+			ctex.drawImage(	head_u_bank.bank[this.head - 1],
+							this.x, this.y,
+							head_u_bank.bank[this.head - 1].width * scale,
+							head_u_bank.bank[this.head - 1].height * scale);
+			ctex.drawImage(	eyes_u_bank.bank[this.eyes - 1],
+							this.x, this.y,
+							eyes_u_bank.bank[this.eyes - 1].width * scale,
+							eyes_u_bank.bank[this.eyes - 1].height * scale);
+			ctex.drawImage(	mouth_u_bank.bank[this.mouth - 1],
+							this.x, this.y,
+							mouth_u_bank.bank[this.mouth - 1].width * scale,
+							mouth_u_bank.bank[this.mouth - 1].height * scale);
+			ctex.drawImage(	lh_u_bank.bank[this.lh - 1],
+							this.x, this.y,
+							lh_u_bank.bank[this.lh - 1].width * scale,
+							lh_u_bank.bank[this.lh - 1].height * scale);
+			ctex.drawImage(	rh_u_bank.bank[this.rh - 1],
+							this.x, this.y,
+							rh_u_bank.bank[this.rh - 1].width * scale,
+							rh_u_bank.bank[this.rh - 1].height * scale);
+			ctex.drawImage(	rl_u_bank.bank[this.rl - 1],
+							this.x, this.y,
+							rl_u_bank.bank[this.rl - 1].width * scale,
+							rl_u_bank.bank[this.rl - 1].height * scale);
+			if(this.skin != 0)
+			{
+				ctex.drawImage(	skin_u_bank.bank[this.skin - 1],
+							this.x, this.y,
+							skin_u_bank.bank[this.skin - 1].width * scale,
+							skin_u_bank.bank[this.skin - 1].height * scale);
+			}
+		}
+		else if (this.direction == 3)
+		{
+			ctex.drawImage(	ll_b_bank.bank[this.ll - 1],
+							this.x, this.y,
+							ll_b_bank.bank[this.ll - 1].width * scale,
+							ll_b_bank.bank[this.ll - 1].height * scale);
+			ctex.drawImage(	body_b_bank.bank[this.body - 1],
+							this.x, this.y,
+							body_b_bank.bank[this.body - 1].width * scale,
+							body_b_bank.bank[this.body - 1].height * scale);
+			ctex.drawImage(	head_b_bank.bank[this.head - 1],
+							this.x, this.y,
+							head_b_bank.bank[this.head - 1].width * scale,
+							head_b_bank.bank[this.head - 1].height * scale);
+			ctex.drawImage(	eyes_b_bank.bank[this.eyes - 1],
+							this.x, this.y,
+							eyes_b_bank.bank[this.eyes - 1].width * scale,
+							eyes_b_bank.bank[this.eyes - 1].height * scale);
+			ctex.drawImage(	mouth_b_bank.bank[this.mouth - 1],
+							this.x, this.y,
+							mouth_b_bank.bank[this.mouth - 1].width * scale,
+							mouth_b_bank.bank[this.mouth - 1].height * scale);
+			ctex.drawImage(	lh_b_bank.bank[this.lh - 1],
+							this.x, this.y,
+							lh_b_bank.bank[this.lh - 1].width * scale,
+							lh_b_bank.bank[this.lh - 1].height * scale);
+			ctex.drawImage(	rh_b_bank.bank[this.rh - 1],
+							this.x, this.y,
+							rh_b_bank.bank[this.rh - 1].width * scale,
+							rh_b_bank.bank[this.rh - 1].height * scale);
+			ctex.drawImage(	rl_b_bank.bank[this.rl - 1],
+							this.x, this.y,
+							rl_b_bank.bank[this.rl - 1].width * scale,
+							rl_b_bank.bank[this.rl - 1].height * scale);
+			if(this.skin != 0)
+			{
+				ctex.drawImage(	skin_b_bank.bank[this.skin - 1],
+							this.x, this.y,
+							skin_b_bank.bank[this.skin - 1].width * scale,
+							skin_b_bank.bank[this.skin - 1].height * scale);
+			}
+		}
+		else if (this.direction == 4)
 		{
 			ctex.drawImage(	ll_r_bank.bank[this.ll - 1],
 							this.x, this.y,
@@ -313,6 +432,14 @@ function canvas_sizes_init()
 	canvas_front.style.left = lx + 'px';
 	canvas_front.width = rx - lx;
 	canvas_front.height = by;
+
+	paint_bckgr_buf.style.left = lx + 'px';
+	paint_bckgr_buf.width = rx - lx;
+	paint_bckgr_buf.height = by;
+
+	paint_buf.style.left = lx + 'px';
+	paint_buf.width = rx - lx;
+	paint_buf.height = by;
 }
 
 function switch_gui(boolvar)
@@ -381,7 +508,7 @@ function move_splash_canvas()
 
 function continue_loading(loading_status, next_bank)
 {
-	var frame = Math.floor(loading_status * (splash_bank.number / 20));
+	var frame = Math.floor(loading_status * (splash_bank.number / 39));
 	splash_ctx.drawImage(
 splash_bank.bank[frame], 0, 0, splash_c.width, splash_c.height);
 	var loading_listener = function (e)
@@ -400,6 +527,8 @@ function finish_loading()
 	clearTimeout(timer_splash);
 	
 	switch_gui(true);
+	
+	splash_c.remove();
 
 	// backgrounds
 	i = 1;
@@ -469,11 +598,32 @@ function finish_loading()
 }
 
 function switch_smooth(boolvar)
-{
+{	
 	ctx.imageSmoothingEnabled = boolvar;
 	ctx.mozImageSmoothingEnabled = boolvar;
 	ctx.msImageSmoothingEnabled = boolvar;
 	ctx.webkitImageSmoothingEnabled = boolvar;
+	
+	ppaint_bckgr_buf.imageSmoothingEnabled = boolvar;
+	ppaint_bckgr_buf.mozImageSmoothingEnabled = boolvar;
+	ppaint_bckgr_buf.msImageSmoothingEnabled = boolvar;
+	ppaint_bckgr_buf.webkitImageSmoothingEnabled = boolvar;
+	
+	ppaint_buf.imageSmoothingEnabled = boolvar;
+	ppaint_buf.mozImageSmoothingEnabled = boolvar;
+	ppaint_buf.msImageSmoothingEnabled = boolvar;
+	ppaint_buf.webkitImageSmoothingEnabled = boolvar;
+	
+	pctx.imageSmoothingEnabled = boolvar;
+	pctx.mozImageSmoothingEnabled = boolvar;
+	pctx.msImageSmoothingEnabled = boolvar;
+	pctx.webkitImageSmoothingEnabled = boolvar;
+	
+	ppaint_bckgr.imageSmoothingEnabled = boolvar;
+	ppaint_bckgr.mozImageSmoothingEnabled = boolvar;
+	ppaint_bckgr.msImageSmoothingEnabled = boolvar;
+	ppaint_bckgr.webkitImageSmoothingEnabled = boolvar;
+	
 	pcanvas_front.imageSmoothingEnabled = boolvar;
 	pcanvas_front.mozImageSmoothingEnabled = boolvar;
 	pcanvas_front.msImageSmoothingEnabled = boolvar;
@@ -490,6 +640,21 @@ function draw_front_background(ctex)
 {
 	ctex.drawImage(bgrnd_front_bank.bank[back_change.selectedIndex - 1],
 				   0, 0, canvas.width, canvas.height);
+}
+
+// thx for idea: https://stackoverflow.com/a/19129822
+function pixelate(dest_canvas, buf_canvas, dest_ctx, buf_ctx, pixel_size)
+{
+	// get a block size
+	var w = dest_canvas.width * pixel_size,
+		h = dest_canvas.height * pixel_size;
+	
+	// draw the original image at a fraction of the final size
+	buf_ctx.drawImage(dest_canvas, 0, 0, w, h);
+
+	// enlarge the minimized image to full size    
+	dest_ctx.drawImage(buf_canvas, 0, 0, w, h, 0, 0,
+						  dest_canvas.width, dest_canvas.height);
 }
 
 // render function called every time when
@@ -684,10 +849,22 @@ paint.addEventListener("mousemove", function(e)
 	{
 		if(moving==true)
 		{
-			x_val = (
+			var x_val = 0, y_val = 0,
+				drc = npcs[npc_id.selectedIndex - 1].direction;
+			if (drc == 2 || drc == 3)
+			{
+				x_val = (
+npcs[npc_id.selectedIndex - 1].x + npc_delta.x + 27 * scale) / (scale * 2.55);
+				y_val = (
+npcs[npc_id.selectedIndex - 1].y + npc_delta.y + 22 * scale) / (scale * 1.74);
+			}
+			else
+			{
+				x_val = (
 npcs[npc_id.selectedIndex - 1].x + npc_delta.x + 27 * scale) / (scale * 3.05);
-			y_val = (
+				y_val = (
 npcs[npc_id.selectedIndex - 1].y + npc_delta.y + 22 * scale) / (scale * 1.26);
+			}
 			
 			if (x_val > 0 && x_val < 100 && y_val > 0 && y_val < 100)
 			{
@@ -749,6 +926,7 @@ del_npc.addEventListener('click', function(event)
 		
 		// decreasing a number, not a counter
 		number_of_npc = number_of_npc - 1;
+		
 		render();
 		
 		move_npc.value = "Двигать";
@@ -759,7 +937,7 @@ del_npc.addEventListener('click', function(event)
 
 skin_id.addEventListener('input', function(event)
 {
-	npcs[npc_id.selectedIndex - 1].skin = skin_id.value;
+	npcs[npc_id.selectedIndex - 1].skin = skin_id.selectedIndex;
 	render();
 });
 
@@ -789,8 +967,17 @@ x.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].x
+		var drc = npcs[npc_id.selectedIndex - 1].direction;
+		if (drc == 2 || drc == 3)
+		{
+			npcs[npc_id.selectedIndex - 1].x
+= Number(x.value) * scale * 2.55 - 27 * scale;
+		}
+		else
+		{
+			npcs[npc_id.selectedIndex - 1].x
 = Number(x.value) * scale * 3.05 - 27 * scale;
+		}
 		render();
 	}
 });
@@ -799,8 +986,17 @@ y.addEventListener('input', function(event)
 {
 	if(npc_id.selectedIndex > 0)
 	{
-		npcs[npc_id.selectedIndex - 1].y
+		var drc = npcs[npc_id.selectedIndex - 1].direction;
+		if (drc == 2 || drc == 3)
+		{
+			npcs[npc_id.selectedIndex - 1].y
+= Number(y.value) * scale * 1.74 - 22 * scale;
+		}
+		else
+		{
+			npcs[npc_id.selectedIndex - 1].y
 = Number(y.value) * scale * 1.26 - 22 * scale;
+		}
 		render();
 	}
 });
@@ -910,34 +1106,20 @@ paint.addEventListener("mousedown", function(e)
 			paint_mouse.x = e.pageX - this.offsetLeft;
 			paint_mouse.y = e.pageY - this.offsetTop;
 			draw = true;
-			if (brush_color)
-			{
-				ppaint_bckgr.strokeStyle = "black";
-			}
-			else
-			{
-				ppaint_bckgr.strokeStyle = "white";
-			}
+			ppaint_bckgr.strokeStyle = brush_color;
 			ppaint_bckgr.beginPath();
 			ppaint_bckgr.moveTo(paint_mouse.x, paint_mouse.y);
-			ppaint_bckgr.lineWidth = 1 * scale;
+			ppaint_bckgr.lineWidth = 2 * scale;
 		}
 		else if (brush_layer_n == 2)
 		{
 			paint_mouse.x = e.pageX - this.offsetLeft;
 			paint_mouse.y = e.pageY - this.offsetTop;
 			draw = true;
-			if (brush_color)
-			{
-				pctx.strokeStyle = "black";
-			}
-			else
-			{
-				pctx.strokeStyle = "white";
-			}
+			pctx.strokeStyle = brush_color;
 			pctx.beginPath();
 			pctx.moveTo(paint_mouse.x, paint_mouse.y);
-			pctx.lineWidth = 1 * scale;
+			pctx.lineWidth = 2 * scale;
 		}
 		
 	}
@@ -954,6 +1136,8 @@ paint.addEventListener("mousemove", function(e)
 				paint_mouse.y = e.pageY - this.offsetTop;
 				ppaint_bckgr.lineTo(paint_mouse.x, paint_mouse.y);
 				ppaint_bckgr.stroke();
+				pixelate(paint_bckgr, paint_buf,
+						 ppaint_bckgr, ppaint_buf, 0.3);
 			}
 		}
 		else if (brush_layer_n == 2)
@@ -963,6 +1147,8 @@ paint.addEventListener("mousemove", function(e)
 				paint_mouse.y = e.pageY - this.offsetTop;
 				pctx.lineTo(paint_mouse.x, paint_mouse.y);
 				pctx.stroke();
+				pixelate(paint, paint_bckgr_buf,
+						 pctx, ppaint_bckgr_buf, 0.1);
 			}
 		}
 	}
@@ -1039,7 +1225,7 @@ brush_layer.addEventListener('input', function(event)
 
 change_brush_color.addEventListener('click', function(event)
 {
-	brush_color = !brush_color;
+	brush_color = "#" + brush_color_text.value;
 });
 
 clear.addEventListener('click', function(event)
@@ -1121,11 +1307,14 @@ del_rp.addEventListener('click', function(event)
 {
 	if(rp_id.selectedIndex > 0)
 	{
+		// updating array
 		rps.splice(rp_id.selectedIndex - 1, 1);
 		
+		// updating list
 		rp_id.remove(rp_id.selectedIndex);
 		rp_id.selectedIndex = 0;
 		
+		// decreasing a number, not a counter
 		number_of_rp = number_of_rp - 1;
 		
 		render();
@@ -1176,8 +1365,8 @@ move_rp.addEventListener('click', function(event)
 	}
 	else
 	{
-		move_rp.value = "Не двигать";
-		rp_cmoving = true;
+		move_rp.value = "Двигать";
+		rp_cmoving = false;
 	}
 });
 
@@ -1201,7 +1390,7 @@ paint.addEventListener("mousemove", function(e)
 			y_val
 = (rps[rp_id.selectedIndex - 1].y - 13 * scale) / (scale * 1.96);
 			
-			if (x_val > 0 && x_val < 100 && y_val > 0 && y_val < 100)
+			if (x_val >= 0 && x_val <= 100 && y_val >= 0 && y_val <= 100)
 			{
 				rp_delta.x = e.pageX - this.offsetLeft - rp_mouse.x;
 				rp_delta.y = e.pageY - this.offsetTop - rp_mouse.y;
@@ -1352,7 +1541,8 @@ this, 0, Number(this.id) * this.height - 0.024* this.height * Number(this.id));
 		var i = btns_placeholder.childNodes.length - 1;
 		while(i >= 0)
 		{
-			btns_placeholder.removeChild(document.getElementById("import_frame_" + i));
+			btns_placeholder.removeChild(
+document.getElementById("import_frame_" + i));
 			i = i - 1;
 		}
 		export_comics.disabled = true;
@@ -1368,9 +1558,18 @@ export_comics.addEventListener('click', function (e)
 	var i = 0;
 	while(i < frames_number.value)
 	{
-		cc_ctx.drawImage(comics_images[i], 0, i * comics_images[i].height - 0.024 * comics_images[i].height * i);
+		cc_ctx.drawImage(
+comics_images[i],
+0,
+i * comics_images[i].height - 0.024 * comics_images[i].height * i);
 		i = i + 1;
 	}
-	Canvas2Image.saveAsPNG(comics_canvas, comics_canvas.width, comics_canvas.height, comics_counter + '.png', smooth_enabled);
+	Canvas2Image.saveAsPNG(
+							comics_canvas,
+							comics_canvas.width,
+							comics_canvas.height,
+							comics_counter + '.png',
+							smooth_enabled
+						  );
 	comics_counter = comics_counter + 1;
 });

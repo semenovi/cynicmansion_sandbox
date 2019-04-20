@@ -1,4 +1,5 @@
-#scr, #paint_bckgr, #scr_2, #paint, #splash
+#scr, #paint_bckgr, #scr_2, #paint, #splash,
+#paint_bckgr_pixelate_buffer, #paint_pixelate_buffer
 {
 	position: absolute;
 	margin: 0px;

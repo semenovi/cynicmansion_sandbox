@@ -7,6 +7,8 @@
 	</head>
 	<body>
 		<canvas id='scr'>Upgrade browser to see canvas</canvas>
+		<canvas id='paint_bckgr_pixelate_buffer'></canvas>
+		<canvas id='paint_pixelate_buffer'></canvas>
 		<canvas id='paint_bckgr'></canvas>
 		<canvas id='scr_2'></canvas>
 		<canvas id='paint'></canvas>
@@ -89,7 +91,8 @@
 							<select id="brush_layer" style="width:100%;">
 								<option>Слой...</option>
 							</select>
-							<input type="button" class='overflowed_button' id="change_brush_color" value="Инвертировать цвет"></input>
+							<input type="text" class='text' id="brush_color_text" placeholder = "Новый цвет..."></input>
+							<input type="button" class='overflowed_button' id="change_brush_color" value="Поменять цвет"></input>
 							<input type="button" class='overflowed_button' id="clear" value="Очистить"></input>
 						</div>
 						<div class='pseudo_fieldset'>
