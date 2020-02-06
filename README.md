@@ -1,1 +1,3 @@
-# cynicmansion_sandbox
+# Cynicmansion sandbox
+![screenshot](scr.jpg)
+Fun project. Based on Cynicmansion comicses.
